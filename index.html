@@ -29,12 +29,22 @@
         <span class="hero-title-accent">만나는 밤</span>
       </h1>
       <p class="hero-sub">20~30대 소셜 파티 · ODD PARTY</p>
-      <a href="form.html" class="btn btn-primary">
-        <span>지금 신청하기</span>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
+      <div class="scarcity-badge">
+        <span class="scarcity-dot"></span>
+        이번 주 파티 잔여석 마감 임박!
+      </div>
+      <div class="hero-tickets">
+        <a href="form.html?gender=male" class="ticket-card ticket-male">
+          <span class="ticket-label">남성 티켓</span>
+          <span class="ticket-price">35,000원~</span>
+          <span class="ticket-cta">신청하기 →</span>
+        </a>
+        <a href="form.html?gender=female" class="ticket-card ticket-female">
+          <span class="ticket-label">여성 티켓</span>
+          <span class="ticket-price">25,000원~</span>
+          <span class="ticket-cta">신청하기 →</span>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -58,6 +68,31 @@
         <span class="chip">📍 건대</span>
         <span class="chip">📍 영등포</span>
         <span class="chip">🗓 매주 금·토·일</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== 후기 =================== -->
+  <section class="section review-section" id="reviews" aria-labelledby="review-title">
+    <div class="container">
+      <p class="section-label">Reviews</p>
+      <h2 class="section-title" id="review-title">참가자 후기</h2>
+      <div class="review-grid fade-up">
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"혼자 갔는데 전혀 어색하지 않았어요. 프로그램이 자연스러워서 금방 친해졌습니다!"</p>
+          <p class="review-author">김○○ · 28세 · 건대점</p>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"분위기가 정말 좋았고, 다양한 사람들을 만날 수 있어서 좋았어요. 다음에도 꼭 갈 거예요!"</p>
+          <p class="review-author">이○○ · 25세 · 영등포점</p>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"소셜 파티 처음인데 기대 이상이었어요. 음료도 무제한이고 사람들도 다 좋았습니다."</p>
+          <p class="review-author">박○○ · 31세 · 건대점</p>
+        </div>
       </div>
     </div>
   </section>
@@ -220,10 +255,9 @@
   <section class="section cta-section" aria-labelledby="cta-title">
     <div class="container">
       <div class="cta-card fade-up">
-        <h2 class="cta-title" id="cta-title">자리가 빠르게 마감됩니다</h2>
+        <h2 class="cta-title" id="cta-title">다음 파티에 초대합니다</h2>
         <p class="cta-sub">
-          매 회차 소수 정예로 진행되어 자리가 빠르게 찹니다.<br/>
-          친구에게 공유하고 함께 신청해 보세요!
+          매 회차 소수 정예로 진행됩니다. 지금 바로 초대를 신청하세요!
         </p>
         <div class="share-row">
           <button class="share-btn" onclick="sharePage()" type="button">
@@ -239,7 +273,7 @@
           </button>
         </div>
         <a href="form.html" class="btn btn-primary" style="min-width:200px;">
-          지금 신청하기 →
+          초대 신청하기 →
         </a>
       </div>
     </div>
@@ -258,9 +292,9 @@
     <div class="sticky-cta-inner">
       <div class="sticky-cta-text">
         <strong>ODD PARTY</strong>
-        자리 마감 임박!
+        이번 주 파티 마감 임박!
       </div>
-      <a href="form.html" class="btn btn-primary btn-small">신청하기 →</a>
+      <a href="form.html" class="btn btn-primary btn-small">초대 신청하기 →</a>
     </div>
   </div>
 

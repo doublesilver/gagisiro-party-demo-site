@@ -19,6 +19,20 @@ function getPrice1() {
 }
 
 /* =============================================
+   PRE-SELECT GENDER FROM URL PARAMS
+   ============================================= */
+/* Pre-select gender from URL params */
+const urlParams = new URLSearchParams(window.location.search);
+const preGender = urlParams.get('gender');
+if (preGender) {
+  const radio = document.getElementById('gender-' + preGender);
+  if (radio) {
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
+
+/* =============================================
    RADIO CARD ACTIVATION
    ============================================= */
 function initRadioCards(groupName) {
@@ -165,6 +179,28 @@ phoneInput.addEventListener('input', () => {
 });
 
 /* =============================================
+   PHOTO PREVIEW
+   ============================================= */
+const photoInput = document.getElementById('field-photo');
+if (photoInput) {
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+    const uploadArea = photoInput.closest('.upload-area') || photoInput.parentElement;
+    let preview = uploadArea.querySelector('.photo-preview-thumb');
+    if (!preview) {
+      preview = document.createElement('img');
+      preview.className = 'photo-preview-thumb';
+      preview.style.cssText = 'max-width:100%;max-height:120px;border-radius:8px;margin-top:8px;display:block;';
+      uploadArea.appendChild(preview);
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => { preview.src = e.target.result; };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* =============================================
    FORM VALIDATION & SUBMIT
    ============================================= */
 function showError(id, show) {
@@ -177,7 +213,7 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
   let valid = true;
 
   const name = document.getElementById('field-name').value.trim();
-  const age = parseInt(document.getElementById('field-age').value);
+  const birthyear = parseInt(document.getElementById('field-birthyear').value);
   const phone = document.getElementById('field-phone').value.trim();
   const gender = document.querySelector('input[name="gender"]:checked')?.value;
   const branch = document.querySelector('input[name="branch"]:checked')?.value;
@@ -189,8 +225,8 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
   showError('err-name', !name);
   if (!name) valid = false;
 
-  showError('err-age', !age || age < 20 || age > 39);
-  if (!age || age < 20 || age > 39) valid = false;
+  showError('err-age', !birthyear || birthyear < 1986 || birthyear > 2005);
+  if (!birthyear || birthyear < 1986 || birthyear > 2005) valid = false;
 
   showError('err-phone', !phone || phone.replace(/\D/g, '').length < 10);
   if (!phone || phone.replace(/\D/g, '').length < 10) valid = false;
@@ -203,6 +239,11 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
 
   showError('err-date', !date);
   if (!date) valid = false;
+
+  const photoInputEl = document.getElementById('field-photo');
+  const hasPhoto = photoInputEl && photoInputEl.files && photoInputEl.files.length > 0;
+  showError('err-photo', !hasPhoto);
+  if (!hasPhoto) valid = false;
 
   if (!valid) {
     const firstErr = document.querySelector('.field-error.show');
@@ -231,7 +272,8 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
 
   const formData = {
     name,
-    age,
+    birthyear,
+    age: new Date().getFullYear() - parseInt(birthyear),
     phone,
     gender,
     branch,
