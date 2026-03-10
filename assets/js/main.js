@@ -204,7 +204,7 @@ if (track) {
 
     /* Apply text content */
     Object.entries(content).forEach(([key, val]) => {
-      if (!val || key === 'pricing' || key === 'scarcity-badge-text' || key === 'sticky-cta-text' || key === 'instagram-id') return;
+      if (!val || key === 'pricing' || key === 'scarcity_override' || key === 'scarcity-badge-text' || key === 'sticky-cta-text' || key === 'instagram-id') return;
       const el = document.getElementById(key);
       if (el) el.innerHTML = val.replace(/\n/g, '<br/>');
     });

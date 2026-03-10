@@ -1253,13 +1253,17 @@
 
           <!-- Hidden fields for save compatibility -->
           <div style="display:none;">
-            <textarea id="main-hero-title"></textarea>
+            <textarea id="hero-title"></textarea>
             <textarea id="main-hero-sub"></textarea>
+            <input id="intro-title" />
             <textarea id="main-about-p1"></textarea>
             <textarea id="main-about-p2"></textarea>
+            <input id="faq-title" />
+            <input id="price-title" />
             <textarea id="main-price-info"></textarea>
             <input id="main-price-note-건대" />
             <input id="main-price-note-영등포" />
+            <input id="gallery-title" />
             <textarea id="main-cta-title"></textarea>
             <textarea id="main-cta-sub"></textarea>
             <textarea id="form-title"></textarea>
@@ -1980,9 +1984,11 @@
        CONTENT MANAGEMENT
     ============================================================ */
     var CONTENT_FIELD_IDS = [
-      'main-hero-title', 'main-hero-sub', 'scarcity-badge-text', 'sticky-cta-text', 'instagram-id',
-      'main-about-p1', 'main-about-p2',
+      'hero-title', 'main-hero-sub', 'scarcity-badge-text', 'sticky-cta-text', 'instagram-id',
+      'intro-title', 'main-about-p1', 'main-about-p2',
+      'faq-title', 'price-title',
       'main-price-info', 'main-price-note-건대', 'main-price-note-영등포',
+      'gallery-title',
       'main-cta-title', 'main-cta-sub',
       'form-title', 'form-subtitle', 'form-submit-note',
       'form-rules-title', 'form-rules-list',
@@ -2420,12 +2426,16 @@
     /* Editable element IDs per iframe */
     var IFRAME_EDITABLE_MAP = {
       'preview-main': [
-        'main-hero-sub', 'main-about-p1', 'main-about-p2',
+        'hero-title', 'main-hero-sub',
+        'intro-title', 'main-about-p1', 'main-about-p2',
+        'faq-title', 'price-title',
         'main-price-info', 'main-price-note-건대', 'main-price-note-영등포',
+        'gallery-title',
         'main-cta-title', 'main-cta-sub'
       ],
       'preview-form': [
-        'form-title', 'form-subtitle', 'form-submit-note',
+        'form-title', 'form-subtitle',
+        'form-submit-note',
         'form-rules-title', 'form-rules-list',
         'form-refund-title', 'form-refund-list', 'form-refund-notice'
       ],
@@ -2530,7 +2540,7 @@
         /* ── Scarcity badge dropdown (form page only) ── */
         if (iframeId === 'preview-form') {
           var scarcityIds = ['scarcity-금요일', 'scarcity-토요일', 'scarcity-일요일'];
-          var scarcityLevels = ['여유', '잔여 소수', '마감임박', '마감'];
+          var scarcityLevels = ['여유', '마감임박', '마감'];
           scarcityIds.forEach(function(badgeId) {
             var badge = iDoc.getElementById(badgeId);
             if (!badge) return;
