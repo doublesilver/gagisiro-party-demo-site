@@ -810,7 +810,9 @@
       transform: scale(0.747); /* 280/375 ≈ 0.747 (frame inner = 300-20padding = 280) */
       transform-origin: top left;
       scrollbar-width: none; -ms-overflow-style: none;
+      opacity: 0; transition: opacity 0.3s ease;
     }
+    .phone-screen.ready { opacity: 1; }
     .phone-screen::-webkit-scrollbar { display: none; }
     .phone-col-actions {
       display: flex; gap: 6px; justify-content: center;
@@ -2484,14 +2486,9 @@
     function refreshPreview(iframeId) {
       var iframe = document.getElementById(iframeId);
       if (iframe) {
+        iframe.classList.remove('ready');
         iframe.src = iframe.src;
-        /* After reload, re-inject saved content with delay to override iframe's own API fetch */
-        iframe.addEventListener('load', function reInject() {
-          iframe.removeEventListener('load', reInject);
-          setTimeout(function() {
-            injectSavedContentIntoIframe(iframe, iframeId);
-          }, 1500);
-        });
+        /* load handler in setup block handles re-injection and reveal */
       }
     }
 
@@ -2729,10 +2726,11 @@
       if (iframe) {
         iframe.addEventListener('load', function() {
           injectEditableOverlay(iframe, iframeId);
-          /* Inject saved content values into iframe immediately AND after delay
-             (to override iframe's own async API fetch that runs after load) */
-          injectSavedContentIntoIframe(iframe, iframeId);
-          setTimeout(function() { injectSavedContentIntoIframe(iframe, iframeId); }, 1500);
+          /* Wait for iframe's own JS to finish fetching from API, then inject admin values and reveal */
+          setTimeout(function() {
+            injectSavedContentIntoIframe(iframe, iframeId);
+            iframe.classList.add('ready');
+          }, 1800);
         });
       }
     });
