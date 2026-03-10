@@ -19,6 +19,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>.dynamic-load{opacity:0;transition:opacity .2s}.dynamic-load.loaded{opacity:1}</style>
 </head>
 <body>
 
@@ -87,7 +88,7 @@
     <div class="container">
       <p class="section-label">Price</p>
       <h2 class="section-title" id="price-title">지점별 가격</h2>
-      <div class="price-grid fade-up">
+      <div class="price-grid fade-up dynamic-load">
         <!-- 건대 -->
         <div class="price-card">
           <div class="price-card-accent" aria-hidden="true"></div>

@@ -220,7 +220,12 @@ if (track) {
         });
       } catch { /* invalid pricing JSON */ }
     }
-  } catch { /* no backend */ }
+    /* Reveal dynamically loaded sections */
+    document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
+  } catch {
+    /* no backend — show defaults */
+    document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
+  }
 })();
 
 /* --- Scroll fade-up --- */

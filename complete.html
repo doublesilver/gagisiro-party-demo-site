@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>.dynamic-load{opacity:0;transition:opacity .2s}.dynamic-load.loaded{opacity:1}</style>
 </head>
 <body data-page="complete">
 
@@ -28,7 +29,7 @@
     <div class="confetti-bar fade-in fade-in-d1" aria-hidden="true"></div>
 
     <!-- 입금 안내 카드 -->
-    <div class="payment-card payment-card-large fade-in fade-in-d1" role="region" aria-label="입금 계좌 정보">
+    <div class="payment-card payment-card-large fade-in fade-in-d1 dynamic-load" role="region" aria-label="입금 계좌 정보">
       <div class="payment-header">
         <p class="payment-title">💳 입금 계좌</p>
         <button class="copy-btn" onclick="copyAccount()" id="copy-account-btn" aria-label="계좌번호 복사">

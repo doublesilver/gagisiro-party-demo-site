@@ -74,7 +74,12 @@
       if (holderEl) holderEl.textContent = '예금주: ' + holder;
       if (noteHolder) noteHolder.textContent = holder;
     }
-  } catch { /* no backend — keep default values */ }
+    /* Reveal payment card */
+    document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
+  } catch {
+    /* no backend — show defaults */
+    document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
+  }
 })();
 
 /* =============================================

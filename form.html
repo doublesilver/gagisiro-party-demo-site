@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>.dynamic-load{opacity:0;transition:opacity .2s}.dynamic-load.loaded{opacity:1}</style>
 </head>
 <body>
 
@@ -22,7 +23,7 @@
     </div>
 
     <!-- 입금 안내 컴팩트 카드 -->
-    <div class="payment-card" role="region" aria-label="입금 계좌 안내">
+    <div class="payment-card dynamic-load" role="region" aria-label="입금 계좌 안내">
       <div class="payment-left">
         <p class="payment-label">입금 계좌</p>
         <p class="payment-bank" id="form-bank-name">농협은행</p>
@@ -176,7 +177,7 @@
           <span class="btn-text">신청하기 🎉</span>
           <span class="spinner" aria-hidden="true"></span>
         </button>
-        <p class="submit-note" id="form-submit-note">
+        <p class="submit-note dynamic-load" id="form-submit-note">
           접수 후 입금 완료 시 신청이 확정됩니다.<br/>
           계좌: <span id="form-submit-note-bank">농협</span> <span id="form-submit-note-account">351-0948-4473-43</span> (<span id="form-submit-note-holder">이@봄</span>)
         </p>

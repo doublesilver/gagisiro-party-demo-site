@@ -107,7 +107,12 @@ if (data) {
     if (bank && bankEl) bankEl.textContent = bank;
     if (account_number && accountEl) accountEl.textContent = account_number;
     if (holder && holderEl) holderEl.textContent = '예금주: ' + holder;
-  } catch { /* no backend — keep default values */ }
+    /* Reveal payment card */
+    document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
+  } catch {
+    /* no backend — show defaults */
+    document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
+  }
 })();
 
 /* =============================================
