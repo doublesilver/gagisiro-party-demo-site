@@ -2,13 +2,26 @@
 (function() {
   const heroBg = document.querySelector('.hero-bg');
   if (!heroBg) return;
+
+  function applyLogoPos(pos) {
+    if (!pos) return;
+    heroBg.style.backgroundPosition = (pos.x ?? 50) + '% ' + (pos.y ?? -10) + '%';
+    heroBg.style.backgroundSize = pos.size || 'contain';
+  }
+
   try {
     const pos = JSON.parse(localStorage.getItem('oddparty_logo_pos'));
-    if (pos) {
-      heroBg.style.backgroundPosition = (pos.x ?? 50) + '% ' + (pos.y ?? -10) + '%';
-      heroBg.style.backgroundSize = pos.size || 'contain';
-    }
+    applyLogoPos(pos);
   } catch { /* no saved position */ }
+
+  // Listen for changes from admin page (same domain, different tab)
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'oddparty_logo_pos') {
+      try {
+        applyLogoPos(JSON.parse(e.newValue));
+      } catch { /* ignore */ }
+    }
+  });
 })();
 
 /* --- Sticky CTA visibility --- */
