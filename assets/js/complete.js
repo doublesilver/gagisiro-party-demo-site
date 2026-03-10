@@ -61,7 +61,7 @@ function copyAccount() {
     const orig = btn.innerHTML;
     btn.innerHTML = '✓ 복사됨';
     setTimeout(() => { btn.innerHTML = orig; }, 2000);
-  });
+  }).catch(() => {});
 }
 
 /* =============================================
@@ -75,7 +75,7 @@ function copyAccount() {
     if (data.instagram_id) {
       const link = document.querySelector('.btn-instagram');
       if (link) {
-        link.href = 'https://instagram.com/' + data.instagram_id;
+        link.href = 'https://www.instagram.com/' + data.instagram_id;
         link.innerHTML = link.innerHTML.replace(/@[\w.]+/, '@' + data.instagram_id);
       }
     }
