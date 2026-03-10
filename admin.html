@@ -2553,80 +2553,27 @@
           '[data-admin-account-editable]:hover{outline:2px dashed rgba(52,152,219,0.5);outline-offset:2px;}' +
           '[data-admin-account-editable]:focus{outline:2px solid rgba(52,152,219,0.8);outline-offset:2px;background:rgba(52,152,219,0.08);}' +
           '[data-admin-account-editable].admin-edited{outline:2px solid rgba(46,204,113,0.6);outline-offset:2px;}' +
-          /* Scarcity dropdown styles */
-          '.admin-scarcity-dropdown{position:absolute;z-index:9999;background:#1e1e2e;border:1.5px solid rgba(167,139,250,0.4);border-radius:8px;padding:4px 0;box-shadow:0 8px 24px rgba(0,0,0,0.4);min-width:100px;}' +
-          '.admin-scarcity-option{padding:6px 14px;font-size:12px;color:#e0e0e0;cursor:pointer;transition:background .15s;white-space:nowrap;}' +
-          '.admin-scarcity-option:hover{background:rgba(167,139,250,0.15);}' +
-          '.admin-scarcity-option.selected{color:#a78bfa;font-weight:700;}' +
-          '[data-admin-scarcity]{pointer-events:auto !important;cursor:pointer !important;position:relative;}' +
-          '[data-admin-scarcity]:hover{outline:2px dashed rgba(241,196,15,0.6);outline-offset:2px;}' +
-          '[data-admin-scarcity].admin-edited{outline:2px solid rgba(46,204,113,0.6);outline-offset:2px;}';
+          '';
         iDoc.head.appendChild(style);
 
         /* ── Scarcity badge dropdown (form page only) ── */
         if (iframeId === 'preview-form') {
           var scarcityIds = ['scarcity-금요일', 'scarcity-토요일', 'scarcity-일요일'];
           var scarcityLevels = ['모집중', '마감임박', '마감'];
+
           scarcityIds.forEach(function(badgeId) {
             var badge = iDoc.getElementById(badgeId);
             if (!badge) return;
-            badge.setAttribute('data-admin-scarcity', badgeId);
-            badge.setAttribute('title', '클릭하여 상태 변경');
             badge.style.pointerEvents = 'auto';
             badge.style.cursor = 'pointer';
+            badge.style.position = 'relative';
+            badge.style.zIndex = '10';
 
             badge.addEventListener('click', function(e) {
               e.preventDefault();
               e.stopPropagation();
-              /* Remove existing dropdown */
-              var existing = iDoc.querySelector('.admin-scarcity-dropdown');
-              if (existing) { existing.remove(); return; }
-
-              var currentLevel = badge.textContent.trim() || '모집중';
-              var dropdown = iDoc.createElement('div');
-              dropdown.className = 'admin-scarcity-dropdown';
-
-              scarcityLevels.forEach(function(level) {
-                var opt = iDoc.createElement('div');
-                opt.className = 'admin-scarcity-option' + (level === currentLevel ? ' selected' : '');
-                opt.textContent = level;
-                opt.addEventListener('click', function(ev) {
-                  ev.stopPropagation();
-                  badge.textContent = level;
-                  /* Update badge class */
-                  if (level === '마감') {
-                    badge.className = 'radio-card-badge closed';
-                  } else if (level === '마감임박') {
-                    badge.className = 'radio-card-badge scarcity urgent';
-                  } else if (level === '잔여 소수') {
-                    badge.className = 'radio-card-badge scarcity';
-                  } else {
-                    badge.className = 'radio-card-badge available';
-                  }
-                  badge.setAttribute('data-admin-scarcity', badgeId);
-                  badge.classList.add('admin-edited');
-                  /* Track override */
-                  var dayName = badgeId.replace('scarcity-', '');
-                  pendingScarcityOverrides[dayName] = level;
-                  updatePendingBadge();
-                  dropdown.remove();
-                });
-                dropdown.appendChild(opt);
-              });
-
-              /* Position dropdown below badge */
-              var rect = badge.getBoundingClientRect();
-              dropdown.style.position = 'fixed';
-              dropdown.style.left = rect.left + 'px';
-              dropdown.style.top = (rect.bottom + 4) + 'px';
-              iDoc.body.appendChild(dropdown);
-
-              /* Close on click outside */
-              var closeHandler = function() {
-                dropdown.remove();
-                iDoc.removeEventListener('click', closeHandler);
-              };
-              setTimeout(function() { iDoc.addEventListener('click', closeHandler); }, 10);
+              /* Show dropdown in parent (admin) page, not inside iframe */
+              showScarcityDropdown(badge, badgeId, iframe);
             });
           });
         }
@@ -2695,6 +2642,79 @@
         /* cross-origin or not loaded yet */
         console.log('iframe inject skipped:', e.message);
       }
+    }
+
+    /* Scarcity dropdown rendered in admin page (not inside iframe) */
+    function showScarcityDropdown(badge, badgeId, iframe) {
+      var scarcityLevels = ['모집중', '마감임박', '마감'];
+      /* Remove any existing dropdown */
+      var existing = document.getElementById('admin-scarcity-dd');
+      if (existing) { existing.remove(); return; }
+
+      var currentLevel = badge.textContent.trim() || '모집중';
+
+      var dropdown = document.createElement('div');
+      dropdown.id = 'admin-scarcity-dd';
+      dropdown.style.cssText = 'position:fixed;z-index:99999;background:#1e1e2e;border:1.5px solid rgba(167,139,250,0.4);border-radius:8px;padding:4px 0;box-shadow:0 8px 24px rgba(0,0,0,0.4);min-width:100px;';
+
+      scarcityLevels.forEach(function(level) {
+        var opt = document.createElement('div');
+        opt.style.cssText = 'padding:8px 16px;font-size:13px;color:#e0e0e0;cursor:pointer;transition:background .15s;white-space:nowrap;font-family:var(--font);';
+        if (level === currentLevel) opt.style.cssText += 'color:#a78bfa;font-weight:700;';
+        opt.textContent = level;
+
+        opt.addEventListener('mouseenter', function() { opt.style.background = 'rgba(167,139,250,0.15)'; });
+        opt.addEventListener('mouseleave', function() { opt.style.background = 'none'; });
+
+        opt.addEventListener('click', function(ev) {
+          ev.stopPropagation();
+          badge.textContent = level;
+          /* Update badge class while preserving scarcity clickability */
+          if (level === '마감') {
+            badge.className = 'radio-card-badge closed';
+          } else if (level === '마감임박') {
+            badge.className = 'radio-card-badge scarcity urgent';
+          } else {
+            badge.className = 'radio-card-badge available';
+          }
+          /* Re-apply pointer-events since className reset removes inline styles */
+          badge.style.pointerEvents = 'auto';
+          badge.style.cursor = 'pointer';
+          badge.style.position = 'relative';
+          badge.style.zIndex = '10';
+          badge.style.outline = '2px solid rgba(46,204,113,0.6)';
+          badge.style.outlineOffset = '2px';
+          setTimeout(function() { badge.style.outline = ''; badge.style.outlineOffset = ''; }, 2000);
+
+          /* Track override */
+          var dayName = badgeId.replace('scarcity-', '');
+          pendingScarcityOverrides[dayName] = level;
+          updatePendingBadge();
+          dropdown.remove();
+        });
+        dropdown.appendChild(opt);
+      });
+
+      /* Calculate position: badge rect in iframe → transform to admin page coords */
+      var badgeRect = badge.getBoundingClientRect();
+      var iframeRect = iframe.getBoundingClientRect();
+      var scale = iframe.offsetWidth > 0 ? iframeRect.width / iframe.contentWindow.document.documentElement.clientWidth : 1;
+
+      var left = iframeRect.left + (badgeRect.left * scale);
+      var top = iframeRect.top + (badgeRect.bottom * scale) + 4;
+
+      dropdown.style.left = left + 'px';
+      dropdown.style.top = top + 'px';
+      document.body.appendChild(dropdown);
+
+      /* Close on click outside */
+      var closeHandler = function(ev) {
+        if (!dropdown.contains(ev.target)) {
+          dropdown.remove();
+          document.removeEventListener('click', closeHandler, true);
+        }
+      };
+      setTimeout(function() { document.addEventListener('click', closeHandler, true); }, 10);
     }
 
     function updatePendingBadge() {
