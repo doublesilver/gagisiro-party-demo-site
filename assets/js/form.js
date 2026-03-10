@@ -8,6 +8,30 @@ function revealPage() {
 }
 
 /* =============================================
+   DATE LABELS — show "13일(금)" format
+   ============================================= */
+(function setDateLabels() {
+  var now = new Date();
+  var day = now.getDay(); // 0=Sun .. 5=Fri 6=Sat
+  var daysUntilFri = (5 - day + 7) % 7;
+  if (daysUntilFri === 0 && now.getHours() >= 23) daysUntilFri = 7;
+  var fri = new Date(now); fri.setDate(now.getDate() + daysUntilFri);
+  var sat = new Date(fri); sat.setDate(fri.getDate() + 1);
+  var sun = new Date(fri); sun.setDate(fri.getDate() + 2);
+
+  var map = { '금요일': fri, '토요일': sat, '일요일': sun };
+  var shortDay = { '금요일': '금', '토요일': '토', '일요일': '일' };
+
+  Object.entries(map).forEach(function(entry) {
+    var key = entry[0], d = entry[1];
+    var label = document.getElementById('date-label-' + key);
+    var sub = document.getElementById('date-sub-' + key);
+    if (label) label.textContent = d.getDate() + '일(' + shortDay[key] + ')';
+    if (sub) sub.textContent = (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
+  });
+})();
+
+/* =============================================
    SCARCITY BADGES (dynamic from API)
    ============================================= */
 async function loadScarcity() {
