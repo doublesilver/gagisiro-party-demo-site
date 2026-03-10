@@ -5,8 +5,8 @@ const raw = sessionStorage.getItem('odd_party_data');
 const data = raw ? JSON.parse(raw) : null;
 
 const PRICES = {
-  '건대': { male: 35000, female: 25000 },
-  '영등포': { male: 38000, female: 28000 },
+  '건대': { male: 33000, female: 23000 },
+  '영등포': { male: 39500, female: 29500 },
 };
 
 function fmtPrice(n) { return n?.toLocaleString('ko-KR') + '원'; }

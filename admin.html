@@ -799,6 +799,7 @@
     <div class="admin-tabs" id="admin-tabs">
       <button class="admin-tab-btn active" data-target="sec-dashboard">대시보드</button>
       <button class="admin-tab-btn" data-target="sec-capacity">날짜별 정원</button>
+      <button class="admin-tab-btn" data-target="sec-pricing">가격 설정</button>
       <button class="admin-tab-btn" data-target="sec-discount">할인코드</button>
       <button class="admin-tab-btn" data-target="sec-content">문구 수정</button>
       <button class="admin-tab-btn" data-target="sec-settings">설정</button>
@@ -818,6 +819,11 @@
           <li class="sidebar-nav-item">
             <button class="sidebar-nav-btn" data-target="sec-capacity" type="button">
               <span class="sidebar-nav-icon">🗓️</span> 날짜별 정원 설정
+            </button>
+          </li>
+          <li class="sidebar-nav-item">
+            <button class="sidebar-nav-btn" data-target="sec-pricing" type="button">
+              <span class="sidebar-nav-icon">💰</span> 가격 설정
             </button>
           </li>
           <li class="sidebar-nav-item">
@@ -922,6 +928,60 @@
           <div class="capacity-grid" id="capacity-grid">
             <div class="content-group" style="text-align:center;color:var(--muted);">불러오는 중…</div>
           </div>
+        </section>
+
+        <!-- ── 가격 설정 ── -->
+        <section class="admin-section" id="sec-pricing">
+          <h2 class="admin-section-title">가격 설정</h2>
+          <p style="color:var(--muted);font-size:var(--fs-sm);margin-bottom:var(--sp-lg);">지점별 참가비를 설정합니다. 변경 시 신청 페이지에 즉시 반영됩니다.</p>
+
+          <div class="content-group">
+            <p class="content-group-title">건대점 (포틀럭)</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div>
+                <label class="content-label">남성 참가비 (원)</label>
+                <input class="settings-input" type="number" id="price-건대-male" value="33000" style="width:100%;" />
+              </div>
+              <div>
+                <label class="content-label">여성 참가비 (원)</label>
+                <input class="settings-input" type="number" id="price-건대-female" value="23000" style="width:100%;" />
+              </div>
+            </div>
+          </div>
+
+          <div class="content-group">
+            <p class="content-group-title">영등포점 (안주제공)</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div>
+                <label class="content-label">남성 참가비 (원)</label>
+                <input class="settings-input" type="number" id="price-영등포-male" value="39500" style="width:100%;" />
+              </div>
+              <div>
+                <label class="content-label">여성 참가비 (원)</label>
+                <input class="settings-input" type="number" id="price-영등포-female" value="29500" style="width:100%;" />
+              </div>
+            </div>
+          </div>
+
+          <div class="content-group">
+            <p class="content-group-title">2부 참여</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div>
+                <label class="content-label">2부 기본가 (원)</label>
+                <input class="settings-input" type="number" id="price-part2-base" value="18000" style="width:100%;" />
+              </div>
+              <div>
+                <label class="content-label">선결제 할인율 (%)</label>
+                <input class="settings-input" type="number" id="price-part2-discount" value="10" min="0" max="50" style="width:100%;" />
+              </div>
+            </div>
+            <p style="color:var(--muted);font-size:var(--fs-xs);margin-top:4px;">
+              예시) 건대 남성 1+2부 선결제: (33,000 + 18,000) × 0.9 = <strong>45,900원</strong>
+            </p>
+          </div>
+
+          <button class="btn-primary" type="button" onclick="savePricing()" style="margin-top:var(--sp-md);">가격 저장</button>
+          <span class="save-msg" id="price-save-msg"></span>
         </section>
 
         <!-- ── 콘텐츠 관리 ── -->
@@ -1308,6 +1368,7 @@
 
       if (targetId === 'sec-dashboard') loadDashboard();
       if (targetId === 'sec-capacity') loadCapacity();
+      if (targetId === 'sec-pricing')  loadPricing();
       if (targetId === 'sec-content')  loadSiteContent();
     }
 
@@ -1608,6 +1669,52 @@
       'complete-title', 'complete-sub',
       'complete-notice-title', 'complete-notice-body'
     ];
+
+    /* ── Pricing ── */
+    function loadPricing() {
+      fetch(API_BASE + '/api/pricing', { headers: authHeaders() })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) {
+          if (!d || !d.pricing) return;
+          var p = d.pricing;
+          if (p['건대']) {
+            document.getElementById('price-건대-male').value = p['건대'].male || 33000;
+            document.getElementById('price-건대-female').value = p['건대'].female || 23000;
+          }
+          if (p['영등포']) {
+            document.getElementById('price-영등포-male').value = p['영등포'].male || 39500;
+            document.getElementById('price-영등포-female').value = p['영등포'].female || 29500;
+          }
+          if (p.part2_base != null) document.getElementById('price-part2-base').value = p.part2_base;
+          if (p.part2_discount != null) document.getElementById('price-part2-discount').value = p.part2_discount;
+        })
+        .catch(function() {});
+    }
+
+    function savePricing() {
+      var pricing = {
+        '건대': {
+          male: parseInt(document.getElementById('price-건대-male').value) || 0,
+          female: parseInt(document.getElementById('price-건대-female').value) || 0
+        },
+        '영등포': {
+          male: parseInt(document.getElementById('price-영등포-male').value) || 0,
+          female: parseInt(document.getElementById('price-영등포-female').value) || 0
+        },
+        part2_base: parseInt(document.getElementById('price-part2-base').value) || 0,
+        part2_discount: parseInt(document.getElementById('price-part2-discount').value) || 0
+      };
+      fetch(API_BASE + '/api/pricing', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ pricing: pricing })
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('save_fail');
+        showToast('가격이 저장되었습니다.');
+      })
+      .catch(function() { showToast('가격 저장에 실패했습니다.', true); });
+    }
 
     function bindContent() {
       document.getElementById('save-content-btn').addEventListener('click', saveContent);

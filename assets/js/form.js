@@ -37,8 +37,8 @@
    PRICE DATA
    ============================================= */
 const PRICES = {
-  '건대': { male: 35000, female: 25000 },
-  '영등포': { male: 38000, female: 28000 },
+  '건대': { male: 33000, female: 23000 },
+  '영등포': { male: 39500, female: 29500 },
 };
 const PART2_BASE = 18000;
 
@@ -238,8 +238,8 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
   showError('err-name', !name);
   if (!name) valid = false;
 
-  showError('err-age', !age || age < 20 || age > 39);
-  if (!age || age < 20 || age > 39) valid = false;
+  showError('err-age', !age || age < 20 || age > 37);
+  if (!age || age < 20 || age > 37) valid = false;
 
   showError('err-phone', !phone || phone.replace(/\D/g, '').length < 10);
   if (!phone || phone.replace(/\D/g, '').length < 10) valid = false;

@@ -464,17 +464,26 @@ class ApplicationStore:
         except ValueError as exc:
             raise ValidationError("나이는 숫자로 입력해 주세요.") from exc
 
-        if age < 1 or age > 99:
-            raise ValidationError("나이는 1세 이상 99세 이하로 입력해 주세요.")
+        if age < 20 or age > 37:
+            raise ValidationError("만 20~37세만 신청 가능합니다.")
 
         # form.js sends: branch, gender, date, discount, price
         branch = self._require_text(payload.get("branch"), "지점", 40)
         gender = self._require_text(payload.get("gender"), "성별", 10)
 
-        PRICES = {
-            "건대": {"male": 35000, "female": 25000},
-            "영등포": {"male": 38000, "female": 28000},
+        # Load pricing from admin settings, fallback to defaults
+        DEFAULT_PRICES = {
+            "건대": {"male": 33000, "female": 23000},
+            "영등포": {"male": 39500, "female": 29500},
         }
+        stored_pricing = STORE.get_site_content_value("pricing")
+        if stored_pricing:
+            try:
+                PRICES = json.loads(stored_pricing)
+            except (json.JSONDecodeError, TypeError):
+                PRICES = DEFAULT_PRICES
+        else:
+            PRICES = DEFAULT_PRICES
         branch_prices = PRICES.get(branch)
         if not branch_prices:
             raise ValidationError("지점 정보를 다시 선택해 주세요.")
@@ -791,6 +800,20 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._write_json(200, {"content": STORE.get_site_content()})
             return
 
+        if parsed.path == "/api/pricing":
+            if not self._require_admin():
+                return
+            pricing = STORE.get_site_content_value("pricing")
+            import json as _json
+            pricing_data = _json.loads(pricing) if pricing else {
+                "건대": {"male": 33000, "female": 23000},
+                "영등포": {"male": 39500, "female": 29500},
+                "part2_base": 18000,
+                "part2_discount": 10,
+            }
+            self._write_json(200, {"pricing": pricing_data})
+            return
+
         if parsed.path == "/api/scarcity":
             result = {"dates": STORE.get_scarcity_info()}
             custom_text = STORE.get_site_content_value("scarcity-badge-text")
@@ -928,6 +951,18 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 result = STORE.set_capacity(day, cap)
                 self._write_json(200, {"capacity": result})
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
+        if parsed.path == "/api/pricing":
+            if not self._require_admin():
+                return
+            try:
+                payload = self._read_payload()
+                pricing_json = json.dumps(payload.get("pricing", {}))
+                STORE.upsert_site_content({"pricing": pricing_json})
+                self._write_json(200, {"ok": True})
             except Exception as exc:
                 self._write_json(500, {"error": str(exc)})
             return
