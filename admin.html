@@ -1726,7 +1726,7 @@
               '<input class="settings-input" type="number" id="faq-o-' + f.id + '" value="' + f.sort_order + '" style="width:80px;" />' +
               '<label style="font-size:var(--fs-xs);display:flex;align-items:center;gap:4px;">' +
               '<input type="checkbox" id="faq-active-' + f.id + '"' + (f.is_active ? ' checked' : '') + '> 표시</label>' +
-              '<button class="btn-primary" type="button" onclick="updateFaq(' + f.id + ')" style="font-size:var(--fs-xs);padding:4px 12px;">저장</button>' +
+              '<button type="button" onclick="updateFaq(' + f.id + ')" style="font-size:var(--fs-xs);padding:4px 12px;background:#3498db;color:#fff;border:none;border-radius:6px;cursor:pointer;">저장</button>' +
               '<button type="button" onclick="deleteFaq(' + f.id + ')" style="font-size:var(--fs-xs);padding:4px 12px;background:#e74c3c;color:#fff;border:none;border-radius:6px;cursor:pointer;">삭제</button>' +
               '</div></div>';
           }).join('');
