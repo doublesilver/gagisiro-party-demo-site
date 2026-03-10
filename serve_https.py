@@ -53,6 +53,7 @@ def set_admin_token(new_token: str) -> None:
     ADMIN_TOKEN_FILE.write_text(new_token)
 ALLOWED_ORIGINS = [
     "https://gagisiro-party-demo-site.vercel.app",
+    "https://oddparty.vercel.app",
     "https://oddparty-api-production.up.railway.app",
 ]
 ACCOUNT_INFO = {
@@ -683,6 +684,12 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
             custom_text = STORE.get_site_content_value("scarcity-badge-text")
             if custom_text:
                 result["custom_badge_text"] = custom_text
+            custom_sticky = STORE.get_site_content_value("sticky-cta-text")
+            if custom_sticky:
+                result["custom_sticky_text"] = custom_sticky
+            ig_id = STORE.get_site_content_value("instagram-id")
+            if ig_id:
+                result["instagram_id"] = ig_id
             self._write_json(200, result)
             return
 

@@ -941,6 +941,14 @@
                 자동 단계: 여유 → 잔여 소수 → 마감 임박 → 마감 (정원 관리 설정 기반)
               </p>
             </div>
+            <div class="content-field">
+              <label class="content-label" for="sticky-cta-text">하단 고정 CTA 문구 <span>(비워두면 잔여석 배지 문구와 동일)</span></label>
+              <input class="content-textarea" type="text" id="sticky-cta-text" placeholder="예: 이번 주 파티 마감 임박!" style="height:auto;padding:10px 14px;" />
+            </div>
+            <div class="content-field">
+              <label class="content-label" for="instagram-id">인스타그램 아이디 <span>(완료 페이지 팔로우 버튼에 적용)</span></label>
+              <input class="content-textarea" type="text" id="instagram-id" placeholder="예: gagisiro_party" style="height:auto;padding:10px 14px;" />
+            </div>
           </div>
 
           <!-- About -->
@@ -1542,7 +1550,7 @@
        CONTENT MANAGEMENT
     ============================================================ */
     var CONTENT_FIELD_IDS = [
-      'main-hero-title', 'main-hero-sub', 'scarcity-badge-text',
+      'main-hero-title', 'main-hero-sub', 'scarcity-badge-text', 'sticky-cta-text', 'instagram-id',
       'main-about-p1', 'main-about-p2',
       'main-price-info',
       'main-cta-title', 'main-cta-sub',

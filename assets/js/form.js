@@ -296,7 +296,7 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
   sessionStorage.setItem('odd_party_data', JSON.stringify(formData));
 
   try {
-    await fetch('https://oddparty-api-production.up.railway.app/api/apply', {
+    await fetch('https://oddparty-api-production.up.railway.app/api/applications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),

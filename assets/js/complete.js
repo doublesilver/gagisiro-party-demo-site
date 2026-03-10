@@ -65,6 +65,24 @@ function copyAccount() {
 }
 
 /* =============================================
+   INSTAGRAM ID (dynamic from API)
+   ============================================= */
+(async function() {
+  try {
+    const res = await fetch('https://oddparty-api-production.up.railway.app/api/scarcity');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.instagram_id) {
+      const link = document.querySelector('.btn-instagram');
+      if (link) {
+        link.href = 'https://instagram.com/' + data.instagram_id;
+        link.innerHTML = link.innerHTML.replace(/@[\w.]+/, '@' + data.instagram_id);
+      }
+    }
+  } catch { /* no backend */ }
+})();
+
+/* =============================================
    SHARE
    ============================================= */
 function sharePage() {

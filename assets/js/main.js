@@ -96,6 +96,8 @@ if (track) {
       if (textEl) textEl.textContent = data.custom_badge_text;
       if (dot) dot.classList.add('urgent');
       badge.style.display = '';
+      const sct = document.getElementById('sticky-cta-text');
+      if (sct) sct.textContent = data.custom_sticky_text || data.custom_badge_text;
       return;
     }
 
@@ -128,6 +130,16 @@ if (track) {
     if (textEl) textEl.textContent = text;
     if (dot && isUrgent) dot.classList.add('urgent');
     badge.style.display = '';
+
+    // sticky-cta 텍스트도 동기화
+    const stickyCtatext = document.getElementById('sticky-cta-text');
+    if (stickyCtatext) {
+      if (data.custom_sticky_text) {
+        stickyCtatext.textContent = data.custom_sticky_text;
+      } else {
+        stickyCtatext.textContent = text;
+      }
+    }
   } catch { /* no backend */ }
 })();
 
