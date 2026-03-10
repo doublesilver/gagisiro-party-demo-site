@@ -775,65 +775,78 @@
     .bottom-nav-btn .bottom-nav-icon { font-size: 1.2rem; }
     .bottom-nav-btn.active { color: var(--primary); }
 
-    /* ── Live editor layout ── */
-    .live-editor-wrap {
-      display: flex; gap: var(--sp-xl); align-items: flex-start;
+    /* ── Visual Editor: 3-phone layout ── */
+    .visual-editor-grid {
+      display: flex; gap: var(--sp-lg); justify-content: center;
+      overflow-x: auto; padding-bottom: var(--sp-md);
+      -webkit-overflow-scrolling: touch;
     }
-    .phone-preview-col {
-      position: sticky; top: calc(var(--header-h) + var(--sp-lg));
-      flex-shrink: 0;
+    .visual-editor-grid::-webkit-scrollbar { height: 4px; }
+    .visual-editor-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .phone-col {
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: var(--sp-sm);
+    }
+    .phone-col-label {
+      font-size: var(--fs-sm); font-weight: 700; color: var(--ink);
+      background: var(--primary-soft); padding: 4px 14px; border-radius: var(--r-full);
     }
     .phone-frame {
-      width: 320px; height: 580px;
-      background: #000; border-radius: 36px;
-      padding: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      width: 300px; height: 540px;
+      background: #1a1a1a; border-radius: 36px;
+      padding: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.25);
       position: relative; overflow: hidden;
     }
     .phone-notch {
-      width: 100px; height: 22px;
-      background: #000; border-radius: 0 0 14px 14px;
+      width: 90px; height: 20px;
+      background: #1a1a1a; border-radius: 0 0 12px 12px;
       position: absolute; top: 0; left: 50%; transform: translateX(-50%);
       z-index: 2;
     }
     .phone-screen {
       width: 100%; height: 100%;
-      border: none; border-radius: 24px;
+      border: none; border-radius: 26px;
       background: var(--bg);
     }
-    .editor-col {
-      flex: 1; min-width: 0;
-      max-height: calc(100vh - var(--header-h) - 80px);
-      overflow-y: auto;
-      padding-right: var(--sp-sm);
+    .phone-col-actions {
+      display: flex; gap: 6px; justify-content: center;
     }
-    .editor-col::-webkit-scrollbar { width: 4px; }
-    .editor-col::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* 기타 설정 (non-visual fields) */
+    .extra-settings-row {
+      display: flex; flex-wrap: wrap; gap: var(--sp-md);
+      margin-bottom: var(--sp-lg); padding: var(--sp-lg);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r-md); box-shadow: var(--shadow-sm);
+    }
+    .extra-setting-item { flex: 1; min-width: 200px; }
+    .extra-setting-item label {
+      display: block; font-size: var(--fs-xs); font-weight: 700;
+      color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .extra-setting-item input {
+      width: 100%; padding: 8px 12px; font-family: var(--font); font-size: var(--fs-sm);
+      color: var(--ink); background: var(--bg-subtle); border: 1.5px solid var(--border);
+      border-radius: var(--r-sm); outline: none; box-sizing: border-box;
+    }
+    .extra-setting-item input:focus { border-color: var(--primary); }
+
+    /* Pending changes indicator */
+    .pending-badge {
+      display: none; font-size: var(--fs-xs); font-weight: 700;
+      color: #fff; background: var(--accent); padding: 2px 8px;
+      border-radius: var(--r-full); margin-left: 6px; vertical-align: middle;
+    }
+    .pending-badge.visible { display: inline; }
 
     @media (max-width: 1100px) {
-      .live-editor-wrap { flex-direction: column; }
-      .phone-preview-col { position: relative; top: 0; align-self: center; }
-      .phone-frame { width: 280px; height: 500px; }
-      .editor-col { max-height: none; }
+      .phone-frame { width: 260px; height: 470px; border-radius: 30px; }
+      .phone-screen { border-radius: 22px; }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 900px) {
+      .visual-editor-grid { justify-content: flex-start; }
       .phone-frame { width: 240px; height: 430px; border-radius: 28px; padding: 8px; }
       .phone-screen { border-radius: 20px; }
     }
-
-    /* ── Content sub-tabs ── */
-    .content-subtabs {
-      display: flex; gap: 0; margin-bottom: var(--sp-xl);
-      border-bottom: 2px solid var(--border); overflow-x: auto;
-    }
-    .content-subtab {
-      font-family: var(--font); font-size: var(--fs-sm); font-weight: 600;
-      color: var(--muted); background: none; border: none;
-      border-bottom: 3px solid transparent; padding: 10px 18px;
-      cursor: pointer; white-space: nowrap; transition: color 0.15s, border-color 0.15s;
-    }
-    .content-subtab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .content-subpanel { display: none; }
-    .content-subpanel.active { display: block; }
 
     /* ── Revenue stat cards ── */
     .revenue-grid {
@@ -1170,173 +1183,93 @@
           <span class="save-msg" id="price-save-msg"></span>
         </section>
 
-        <!-- ── 콘텐츠 관리 (라이브 프리뷰) ── -->
+        <!-- ── 콘텐츠 관리 (비주얼 에디터) ── -->
         <section class="admin-section" id="sec-content">
-          <h2 class="admin-section-title">사이트 문구 수정</h2>
-          <p style="color:var(--muted);font-size:var(--fs-sm);margin-bottom:var(--sp-lg);">실시간 미리보기를 보면서 문구를 수정할 수 있습니다. 수정 후 반드시 저장 버튼을 눌러주세요.</p>
+          <h2 class="admin-section-title">사이트 문구 수정 <span class="pending-badge" id="pending-badge">변경사항 있음</span></h2>
+          <p style="color:var(--muted);font-size:var(--fs-sm);margin-bottom:var(--sp-md);">화면에서 편집할 텍스트를 직접 클릭하여 수정하세요. 편집 가능한 영역은 마우스를 올리면 하이라이트됩니다.</p>
 
-          <!-- Sub-tabs -->
-          <div class="content-subtabs">
-            <button class="content-subtab active" data-panel="content-panel-main" data-preview="index.html" type="button">메인 페이지</button>
-            <button class="content-subtab" data-panel="content-panel-form" data-preview="form.html" type="button">신청 페이지</button>
-            <button class="content-subtab" data-panel="content-panel-complete" data-preview="complete.html" type="button">완료 페이지</button>
+          <!-- 기타 설정 (화면에 보이지 않는 필드) -->
+          <div class="extra-settings-row">
+            <div class="extra-setting-item">
+              <label for="scarcity-badge-text">잔여석 배지 (비워두면 자동)</label>
+              <input type="text" id="scarcity-badge-text" placeholder="예: 이번 주 파티 마감 임박!" />
+            </div>
+            <div class="extra-setting-item">
+              <label for="sticky-cta-text">하단 고정 CTA 문구</label>
+              <input type="text" id="sticky-cta-text" placeholder="배지 문구와 동일" />
+            </div>
+            <div class="extra-setting-item">
+              <label for="instagram-id">인스타그램 아이디</label>
+              <input type="text" id="instagram-id" placeholder="odd_party" />
+            </div>
           </div>
 
-          <!-- 라이브 프리뷰 레이아웃 -->
-          <div class="live-editor-wrap">
-
-            <!-- 프리뷰 (폰 목업) -->
-            <div class="phone-preview-col">
+          <!-- 3개의 폰 프리뷰 -->
+          <div class="visual-editor-grid">
+            <!-- 메인 페이지 -->
+            <div class="phone-col">
+              <span class="phone-col-label">메인 페이지</span>
               <div class="phone-frame">
                 <div class="phone-notch"></div>
-                <iframe id="preview-iframe" src="index.html" class="phone-screen"></iframe>
+                <iframe id="preview-main" src="index.html" class="phone-screen"></iframe>
               </div>
-              <div style="text-align:center;margin-top:var(--sp-sm);">
-                <button class="dash-btn" type="button" id="preview-refresh-btn" style="font-size:var(--fs-xs);">↻ 새로고침</button>
-                <a href="index.html" target="_blank" rel="noopener" class="dash-btn" id="preview-newtab-btn" style="font-size:var(--fs-xs);text-decoration:none;margin-left:4px;">↗ 새 탭</a>
+              <div class="phone-col-actions">
+                <button class="dash-btn" type="button" onclick="refreshPreview('preview-main')" style="font-size:10px;padding:4px 10px;">↻</button>
+                <a href="index.html" target="_blank" class="dash-btn" style="font-size:10px;padding:4px 10px;text-decoration:none;">↗ 새 탭</a>
               </div>
             </div>
 
-            <!-- 에디터 -->
-            <div class="editor-col">
-
-              <!-- 메인 페이지 패널 -->
-              <div class="content-subpanel active" id="content-panel-main">
-                <div class="content-group">
-                  <p class="content-group-title">히어로 영역</p>
-                  <div class="content-field">
-                    <label class="content-label" for="main-hero-title">메인 제목</label>
-                    <textarea class="content-textarea" id="main-hero-title" rows="2" data-preview-id="main-hero-title" placeholder="낯선 사람들이 만나는 밤"></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="main-hero-sub">메인 부제목</label>
-                    <textarea class="content-textarea" id="main-hero-sub" rows="2" data-preview-id="main-hero-sub" placeholder="20~30대 소셜 파티 · ODD PARTY"></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="scarcity-badge-text">잔여석 배지 문구 <span>(비워두면 자동)</span></label>
-                    <input class="content-textarea" type="text" id="scarcity-badge-text" placeholder="예: 이번 주 파티 잔여석 마감 임박!" style="height:auto;padding:10px 14px;" />
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="sticky-cta-text">하단 고정 CTA 문구</label>
-                    <input class="content-textarea" type="text" id="sticky-cta-text" placeholder="예: 이번 주 파티 마감 임박!" style="height:auto;padding:10px 14px;" />
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="instagram-id">인스타그램 아이디</label>
-                    <input class="content-textarea" type="text" id="instagram-id" placeholder="예: odd_party" style="height:auto;padding:10px 14px;" />
-                  </div>
-                </div>
-                <div class="content-group">
-                  <p class="content-group-title">파티 소개</p>
-                  <div class="content-field">
-                    <label class="content-label" for="main-about-p1">소개 첫번째 문단</label>
-                    <textarea class="content-textarea" id="main-about-p1" rows="3" data-preview-id="main-about-p1" placeholder="ODD PARTY는 혼자 가도 어색하지 않은 소셜 파티입니다."></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="main-about-p2">소개 두번째 문단</label>
-                    <textarea class="content-textarea" id="main-about-p2" rows="3" data-preview-id="main-about-p2" placeholder="매주 금·토·일 진행되며, 서울 건대 / 영등포 두 지점에서 만나볼 수 있습니다."></textarea>
-                  </div>
-                </div>
-                <div class="content-group">
-                  <p class="content-group-title">가격 안내</p>
-                  <div class="content-field">
-                    <label class="content-label" for="main-price-info">가격 안내 설명</label>
-                    <textarea class="content-textarea" id="main-price-info" rows="2" data-preview-id="main-price-info" placeholder="주류및 음료는 모든 지점 제공됩니다!"></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="main-price-note-건대">건대점 가격 카드 메모</label>
-                    <input class="content-textarea" type="text" id="main-price-note-건대" data-preview-id="main-price-note-건대" placeholder="포틀럭 포함" style="height:auto;padding:10px 14px;" />
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="main-price-note-영등포">영등포점 가격 카드 메모</label>
-                    <input class="content-textarea" type="text" id="main-price-note-영등포" data-preview-id="main-price-note-영등포" placeholder="안주 포함" style="height:auto;padding:10px 14px;" />
-                  </div>
-                </div>
-                <div class="content-group">
-                  <p class="content-group-title">신청 유도 영역</p>
-                  <div class="content-field">
-                    <label class="content-label" for="main-cta-title">신청 유도 제목</label>
-                    <textarea class="content-textarea" id="main-cta-title" rows="2" data-preview-id="main-cta-title" placeholder="다음 파티에 초대합니다"></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="main-cta-sub">신청 유도 설명</label>
-                    <textarea class="content-textarea" id="main-cta-sub" rows="2" data-preview-id="main-cta-sub" placeholder="매 회차 소수 정예로 진행됩니다."></textarea>
-                  </div>
-                </div>
+            <!-- 신청 페이지 -->
+            <div class="phone-col">
+              <span class="phone-col-label">신청 페이지</span>
+              <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <iframe id="preview-form" src="form.html" class="phone-screen"></iframe>
               </div>
-
-              <!-- 신청 페이지 패널 -->
-              <div class="content-subpanel" id="content-panel-form">
-                <div class="content-group">
-                  <p class="content-group-title">신청 페이지 상단</p>
-                  <div class="content-field">
-                    <label class="content-label" for="form-title">페이지 제목</label>
-                    <textarea class="content-textarea" id="form-title" rows="2" data-preview-id="form-title" placeholder="파티 초대 신청"></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="form-subtitle">부제목</label>
-                    <textarea class="content-textarea" id="form-subtitle" rows="2" data-preview-id="form-subtitle" placeholder="신청서를 검토 후 확정 안내를 드립니다."></textarea>
-                  </div>
-                </div>
-                <div class="content-group">
-                  <p class="content-group-title">참여 규칙</p>
-                  <div class="content-field">
-                    <label class="content-label" for="form-rules-title">규칙 제목</label>
-                    <input class="content-textarea" type="text" id="form-rules-title" data-preview-id="form-rules-title" placeholder="ODD PARTY 참여 규칙" style="height:auto;padding:10px 14px;" />
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="form-rules-list">규칙 항목 <span>(줄바꿈으로 구분)</span></label>
-                    <textarea class="content-textarea tall" id="form-rules-list" rows="5" data-preview-id="form-rules-list" placeholder="노쇼(No-show) 시 향후 파티 참여가 제한됩니다.&#10;다른 참가자에게 불쾌감을 주는 행동은 퇴장 조치될 수 있습니다.&#10;과도한 음주는 삼가주세요.&#10;파티 중 촬영이 진행될 수 있으며, 참여 시 초상권 사용에 동의하는 것으로 간주됩니다."></textarea>
-                  </div>
-                </div>
-                <div class="content-group">
-                  <p class="content-group-title">제출 안내 및 환불 규정</p>
-                  <div class="content-field">
-                    <label class="content-label" for="form-submit-note">제출 버튼 아래 안내</label>
-                    <textarea class="content-textarea" id="form-submit-note" rows="2" data-preview-id="form-submit-note" placeholder="접수 후 입금 완료 시 신청이 확정됩니다."></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="form-refund-title">환불 규정 제목</label>
-                    <input class="content-textarea" type="text" id="form-refund-title" data-preview-id="form-refund-title" placeholder="참가비 환불 규정" style="height:auto;padding:10px 14px;" />
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="form-refund-list">환불 규정 항목 <span>(줄바꿈으로 구분)</span></label>
-                    <textarea class="content-textarea tall" id="form-refund-list" rows="4" data-preview-id="form-refund-list" placeholder="파티 4일 전까지 취소: 전액 환불&#10;파티 3일 전~당일 취소: 환불 불가"></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="form-refund-notice">환불 규정 추가 안내</label>
-                    <textarea class="content-textarea" id="form-refund-notice" rows="2" data-preview-id="form-refund-notice" placeholder="* 파티 참여는 초상권 동의에 해당합니다."></textarea>
-                  </div>
-                </div>
+              <div class="phone-col-actions">
+                <button class="dash-btn" type="button" onclick="refreshPreview('preview-form')" style="font-size:10px;padding:4px 10px;">↻</button>
+                <a href="form.html" target="_blank" class="dash-btn" style="font-size:10px;padding:4px 10px;text-decoration:none;">↗ 새 탭</a>
               </div>
+            </div>
 
-              <!-- 완료 페이지 패널 -->
-              <div class="content-subpanel" id="content-panel-complete">
-                <div class="content-group">
-                  <p class="content-group-title">신청 완료 상단</p>
-                  <div class="content-field">
-                    <label class="content-label" for="complete-title">완료 제목</label>
-                    <textarea class="content-textarea" id="complete-title" rows="2" data-preview-id="complete-title" placeholder="ODD PARTY에 이름이 올랐습니다"></textarea>
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="complete-sub">완료 안내</label>
-                    <textarea class="content-textarea" id="complete-sub" rows="2" data-preview-id="complete-sub" placeholder="축하합니다! 초대 신청이 접수되었습니다."></textarea>
-                  </div>
-                </div>
-                <div class="content-group">
-                  <p class="content-group-title">확정 안내 박스</p>
-                  <div class="content-field">
-                    <label class="content-label" for="complete-notice-title">안내 제목</label>
-                    <input class="content-textarea" type="text" id="complete-notice-title" data-preview-id="complete-notice-title" placeholder="ℹ️ 확정 안내" style="height:auto;padding:10px 14px;" />
-                  </div>
-                  <div class="content-field">
-                    <label class="content-label" for="complete-notice-body">안내 내용</label>
-                    <textarea class="content-textarea tall" id="complete-notice-body" rows="3" data-preview-id="complete-notice-body" placeholder="입금 완료 후 24시간 이내 문자 또는 카카오톡으로 확정 안내를 드립니다."></textarea>
-                  </div>
-                </div>
+            <!-- 완료 페이지 -->
+            <div class="phone-col">
+              <span class="phone-col-label">완료 페이지</span>
+              <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <iframe id="preview-complete" src="complete.html" class="phone-screen"></iframe>
               </div>
+              <div class="phone-col-actions">
+                <button class="dash-btn" type="button" onclick="refreshPreview('preview-complete')" style="font-size:10px;padding:4px 10px;">↻</button>
+                <a href="complete.html" target="_blank" class="dash-btn" style="font-size:10px;padding:4px 10px;text-decoration:none;">↗ 새 탭</a>
+              </div>
+            </div>
+          </div>
 
-            </div><!-- /editor-col -->
-          </div><!-- /live-editor-wrap -->
+          <!-- Hidden fields for save compatibility -->
+          <div style="display:none;">
+            <textarea id="main-hero-title"></textarea>
+            <textarea id="main-hero-sub"></textarea>
+            <textarea id="main-about-p1"></textarea>
+            <textarea id="main-about-p2"></textarea>
+            <textarea id="main-price-info"></textarea>
+            <input id="main-price-note-건대" />
+            <input id="main-price-note-영등포" />
+            <textarea id="main-cta-title"></textarea>
+            <textarea id="main-cta-sub"></textarea>
+            <textarea id="form-title"></textarea>
+            <textarea id="form-subtitle"></textarea>
+            <input id="form-rules-title" />
+            <textarea id="form-rules-list"></textarea>
+            <textarea id="form-submit-note"></textarea>
+            <input id="form-refund-title" />
+            <textarea id="form-refund-list"></textarea>
+            <textarea id="form-refund-notice"></textarea>
+            <textarea id="complete-title"></textarea>
+            <textarea id="complete-sub"></textarea>
+            <input id="complete-notice-title" />
+            <textarea id="complete-notice-body"></textarea>
+          </div>
         </section>
 
         <!-- ── FAQ 관리 ── -->
@@ -1712,7 +1645,7 @@
       if (targetId === 'sec-capacity') loadCapacity();
       if (targetId === 'sec-pricing')  { loadPricing(); setTimeout(updatePricePreview, 500); }
       if (targetId === 'sec-faq')      loadFaqList();
-      if (targetId === 'sec-content')  loadSiteContent();
+      if (targetId === 'sec-content')  { loadSiteContent(); loadAccountIntoIframes(); }
       if (targetId === 'sec-settings') loadAccountInfo();
     }
 
@@ -2187,10 +2120,20 @@
       })
       .then(function(data) {
         var content = data.content || data;
+        /* Populate hidden fields */
         CONTENT_FIELD_IDS.forEach(function(id) {
           var el = document.getElementById(id);
           if (el && content[id] !== undefined) el.value = content[id];
         });
+        /* Inject into already-loaded iframes */
+        ['preview-main', 'preview-form', 'preview-complete'].forEach(function(iframeId) {
+          var iframe = document.getElementById(iframeId);
+          if (iframe) injectSavedContentIntoIframe(iframe, iframeId);
+        });
+        /* Clear pending state on fresh load */
+        pendingChanges = {};
+        pendingAccountChanges = {};
+        updatePendingBadge();
       })
       .catch(function() {
         showToast('콘텐츠를 불러오지 못했습니다.', true);
@@ -2204,17 +2147,53 @@
         if (el) content[id] = el.value;
       });
 
-      fetch(API_BASE + '/api/site-content', {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ content: content })
-      })
-      .then(function(r) {
-        if (!r.ok) throw new Error('save_fail');
+      /* Also collect from pending iframe edits */
+      Object.keys(pendingChanges).forEach(function(id) {
+        content[id] = pendingChanges[id];
+      });
+
+      var savePromises = [];
+
+      /* Save site content */
+      savePromises.push(
+        fetch(API_BASE + '/api/site-content', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ content: content })
+        }).then(function(r) { if (!r.ok) throw new Error('save_fail'); })
+      );
+
+      /* Save account info if changed */
+      if (Object.keys(pendingAccountChanges).length > 0) {
+        /* Fetch current account info first, then merge */
+        savePromises.push(
+          fetch(API_BASE + '/api/admin/account', { headers: authHeaders() })
+          .then(function(r) { return r.ok ? r.json() : { bank: '농협은행', account_number: '351-0948-4473-43', holder: '이@봄' }; })
+          .then(function(current) {
+            var merged = Object.assign({}, current, pendingAccountChanges);
+            return fetch(API_BASE + '/api/admin/account', {
+              method: 'POST',
+              headers: authHeaders(),
+              body: JSON.stringify(merged)
+            });
+          })
+          .then(function(r) { if (!r.ok) throw new Error('account_save_fail'); })
+        );
+      }
+
+      Promise.all(savePromises)
+      .then(function() {
         var msg = document.getElementById('save-success-msg');
         msg.classList.add('visible');
         setTimeout(function() { msg.classList.remove('visible'); }, 2500);
         showToast('콘텐츠가 저장되었습니다.');
+        /* Clear pending and refresh iframes */
+        pendingChanges = {};
+        pendingAccountChanges = {};
+        updatePendingBadge();
+        ['preview-main', 'preview-form', 'preview-complete'].forEach(function(id) {
+          refreshPreview(id);
+        });
       })
       .catch(function() {
         showToast('저장 실패', true);
@@ -2423,62 +2402,220 @@
     }
 
     /* ============================================================
-       CONTENT SUB-TABS + LIVE PREVIEW
+       3-PHONE VISUAL EDITOR (inline iframe editing)
     ============================================================ */
-    var previewPageMap = { 'content-panel-main': 'index.html', 'content-panel-form': 'form.html', 'content-panel-complete': 'complete.html' };
-    var currentPreviewPage = 'index.html';
 
-    document.querySelectorAll('.content-subtab').forEach(function(tab) {
-      tab.addEventListener('click', function() {
-        document.querySelectorAll('.content-subtab').forEach(function(t) { t.classList.remove('active'); });
-        document.querySelectorAll('.content-subpanel').forEach(function(p) { p.classList.remove('active'); });
-        tab.classList.add('active');
-        var panelId = tab.getAttribute('data-panel');
-        var panel = document.getElementById(panelId);
-        if (panel) panel.classList.add('active');
-        // Switch iframe preview
-        var page = previewPageMap[panelId] || 'index.html';
-        currentPreviewPage = page;
-        var iframe = document.getElementById('preview-iframe');
-        if (iframe) iframe.src = page;
-        var newtab = document.getElementById('preview-newtab-btn');
-        if (newtab) newtab.href = page;
-      });
-    });
+    /* Editable element IDs per iframe */
+    var IFRAME_EDITABLE_MAP = {
+      'preview-main': [
+        'main-hero-sub', 'main-about-p1', 'main-about-p2',
+        'main-price-info', 'main-price-note-건대', 'main-price-note-영등포',
+        'main-cta-title', 'main-cta-sub'
+      ],
+      'preview-form': [
+        'form-title', 'form-subtitle', 'form-submit-note',
+        'form-rules-title', 'form-rules-list',
+        'form-refund-title', 'form-refund-list', 'form-refund-notice'
+      ],
+      'preview-complete': [
+        'complete-title', 'complete-sub',
+        'complete-notice-title', 'complete-notice-body'
+      ]
+    };
 
-    // Refresh button
-    document.getElementById('preview-refresh-btn').addEventListener('click', function() {
-      var iframe = document.getElementById('preview-iframe');
-      if (iframe) iframe.src = iframe.src;
-    });
+    /* Account info fields (special handling - saved via /api/admin/account) */
+    var ACCOUNT_EDITABLE_MAP = {
+      'preview-form': {
+        'form-bank-name': 'bank',
+        'account-number': 'account_number',
+        'form-account-holder': 'holder'
+      },
+      'preview-complete': {
+        'complete-bank-name': 'bank',
+        'account-number': 'account_number',
+        'complete-account-holder': 'holder'
+      }
+    };
 
-    // Live preview: on field input, update iframe DOM in real-time
-    function setupLivePreview() {
-      document.querySelectorAll('[data-preview-id]').forEach(function(field) {
-        field.addEventListener('input', function() {
-          var previewId = this.getAttribute('data-preview-id');
-          var val = this.value;
-          try {
-            var iframe = document.getElementById('preview-iframe');
-            var iDoc = iframe.contentDocument || iframe.contentWindow.document;
-            var el = iDoc.getElementById(previewId);
-            if (el) {
-              el.innerHTML = val.replace(/\n/g, '<br/>');
-              // Highlight effect
-              el.style.outline = '2px solid rgba(167,139,250,0.6)';
-              el.style.outlineOffset = '2px';
-              clearTimeout(el._hlTimer);
-              el._hlTimer = setTimeout(function() {
-                el.style.outline = 'none';
-                el.style.outlineOffset = '';
-              }, 1500);
-            }
-          } catch(e) { /* cross-origin or not loaded yet */ }
-        });
-      });
+    var pendingChanges = {};
+    var pendingAccountChanges = {};
+
+    function refreshPreview(iframeId) {
+      var iframe = document.getElementById(iframeId);
+      if (iframe) {
+        iframe.src = iframe.src;
+      }
     }
-    // Re-setup after iframe loads
-    document.getElementById('preview-iframe').addEventListener('load', setupLivePreview);
+
+    function injectEditableOverlay(iframe, iframeId) {
+      try {
+        var iDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!iDoc || !iDoc.body) return;
+
+        /* Inject editing styles */
+        var style = iDoc.createElement('style');
+        style.textContent =
+          '[data-admin-editable]{cursor:pointer;transition:outline .2s,background .2s;border-radius:4px;}' +
+          '[data-admin-editable]:hover{outline:2px dashed rgba(167,139,250,0.5);outline-offset:2px;}' +
+          '[data-admin-editable]:focus{outline:2px solid rgba(167,139,250,0.8);outline-offset:2px;background:rgba(167,139,250,0.08);}' +
+          '[data-admin-editable].admin-edited{outline:2px solid rgba(46,204,113,0.6);outline-offset:2px;}' +
+          '[data-admin-account-editable]{cursor:pointer;transition:outline .2s,background .2s;border-radius:4px;}' +
+          '[data-admin-account-editable]:hover{outline:2px dashed rgba(52,152,219,0.5);outline-offset:2px;}' +
+          '[data-admin-account-editable]:focus{outline:2px solid rgba(52,152,219,0.8);outline-offset:2px;background:rgba(52,152,219,0.08);}' +
+          '[data-admin-account-editable].admin-edited{outline:2px solid rgba(46,204,113,0.6);outline-offset:2px;}';
+        iDoc.head.appendChild(style);
+
+        /* Mark content editable fields */
+        var contentIds = IFRAME_EDITABLE_MAP[iframeId] || [];
+        contentIds.forEach(function(id) {
+          var el = iDoc.getElementById(id);
+          if (!el) return;
+          el.setAttribute('contenteditable', 'true');
+          el.setAttribute('data-admin-editable', id);
+          el.setAttribute('title', '클릭하여 수정 (' + id + ')');
+
+          el.addEventListener('focus', function() {
+            el.classList.remove('admin-edited');
+          });
+
+          el.addEventListener('blur', function() {
+            var newVal = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').trim();
+            var hiddenField = document.getElementById(id);
+            if (hiddenField) {
+              hiddenField.value = newVal;
+            }
+            pendingChanges[id] = newVal;
+            el.classList.add('admin-edited');
+            updatePendingBadge();
+          });
+
+          el.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { el.blur(); }
+          });
+        });
+
+        /* Mark account editable fields */
+        var accountIds = ACCOUNT_EDITABLE_MAP[iframeId] || {};
+        Object.keys(accountIds).forEach(function(elId) {
+          var el = iDoc.getElementById(elId);
+          if (!el) return;
+          el.setAttribute('contenteditable', 'true');
+          el.setAttribute('data-admin-account-editable', elId);
+          el.setAttribute('title', '클릭하여 수정 (계좌 정보)');
+
+          el.addEventListener('focus', function() {
+            el.classList.remove('admin-edited');
+          });
+
+          el.addEventListener('blur', function() {
+            var newVal = el.textContent.trim();
+            /* Strip prefix like "예금주: " */
+            if (elId.indexOf('holder') !== -1) {
+              newVal = newVal.replace(/^예금주:\s*/, '');
+            }
+            var accountKey = accountIds[elId];
+            pendingAccountChanges[accountKey] = newVal;
+            el.classList.add('admin-edited');
+            updatePendingBadge();
+          });
+
+          el.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { el.blur(); }
+            if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+          });
+        });
+
+      } catch(e) {
+        /* cross-origin or not loaded yet */
+        console.log('iframe inject skipped:', e.message);
+      }
+    }
+
+    function updatePendingBadge() {
+      var count = Object.keys(pendingChanges).length + Object.keys(pendingAccountChanges).length;
+      var badge = document.getElementById('pending-badge');
+      if (badge) {
+        badge.textContent = count + '개 변경사항';
+        badge.style.display = count > 0 ? 'inline' : 'none';
+      }
+    }
+
+    /* Setup iframes on load */
+    ['preview-main', 'preview-form', 'preview-complete'].forEach(function(iframeId) {
+      var iframe = document.getElementById(iframeId);
+      if (iframe) {
+        iframe.addEventListener('load', function() {
+          injectEditableOverlay(iframe, iframeId);
+          /* Inject saved content values into iframe */
+          injectSavedContentIntoIframe(iframe, iframeId);
+        });
+      }
+    });
+
+    function injectSavedContentIntoIframe(iframe, iframeId) {
+      try {
+        var iDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!iDoc) return;
+        var contentIds = IFRAME_EDITABLE_MAP[iframeId] || [];
+        contentIds.forEach(function(id) {
+          var hiddenField = document.getElementById(id);
+          var iframeEl = iDoc.getElementById(id);
+          if (hiddenField && hiddenField.value && iframeEl) {
+            iframeEl.innerHTML = hiddenField.value.replace(/\n/g, '<br/>');
+          }
+        });
+      } catch(e) { /* cross-origin */ }
+    }
+
+    /* Load account info into form/complete iframes */
+    function loadAccountIntoIframes() {
+      fetch(API_BASE + '/api/account')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data) return;
+        ['preview-form', 'preview-complete'].forEach(function(iframeId) {
+          try {
+            var iframe = document.getElementById(iframeId);
+            var iDoc = iframe.contentDocument || iframe.contentWindow.document;
+            if (!iDoc) return;
+            var accountMap = ACCOUNT_EDITABLE_MAP[iframeId] || {};
+            Object.keys(accountMap).forEach(function(elId) {
+              var el = iDoc.getElementById(elId);
+              if (!el) return;
+              var key = accountMap[elId];
+              if (key === 'bank' && data.bank) el.textContent = data.bank;
+              if (key === 'account_number' && data.account_number) el.textContent = data.account_number;
+              if (key === 'holder' && data.holder) el.textContent = '예금주: ' + data.holder;
+            });
+          } catch(e) { /* cross-origin */ }
+        });
+      })
+      .catch(function() {});
+    }
+
+    /* Extra settings (scarcity, cta, instagram) - bind input to hidden + iframe sync */
+    ['scarcity-badge-text', 'sticky-cta-text', 'instagram-id'].forEach(function(id) {
+      var input = document.getElementById(id);
+      if (!input) return;
+      input.addEventListener('input', function() {
+        pendingChanges[id] = input.value;
+        updatePendingBadge();
+        /* Try to update in main iframe */
+        try {
+          var iframe = document.getElementById('preview-main');
+          var iDoc = iframe.contentDocument || iframe.contentWindow.document;
+          var iframeEl = iDoc.getElementById(id === 'scarcity-badge-text' ? 'scarcity-badge' : id === 'sticky-cta-text' ? 'sticky-cta-text' : null);
+          if (iframeEl) {
+            if (id === 'scarcity-badge-text') {
+              var textSpan = iframeEl.querySelector('.scarcity-text');
+              if (textSpan) textSpan.textContent = input.value;
+            } else {
+              iframeEl.textContent = input.value;
+            }
+          }
+        } catch(e) {}
+      });
+    });
 
     /* ============================================================
        PRICE PREVIEW
