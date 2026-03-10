@@ -305,6 +305,12 @@ input {
   padding: 0 var(--sp-xl) 64px;
   text-align: center;
 }
+.hero-logo {
+  width: 160px;
+  height: auto;
+  margin-bottom: var(--sp-lg);
+  filter: drop-shadow(0 0 24px rgba(167, 139, 250, 0.4));
+}
 .hero-badges {
   display: flex;
   flex-wrap: wrap;
