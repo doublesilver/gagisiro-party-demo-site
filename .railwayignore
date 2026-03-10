@@ -1,0 +1,8 @@
+assets/images/
+assets/css/
+assets/js/
+*.html
+vercel.json
+.vercel/
+data/
+.cert/
