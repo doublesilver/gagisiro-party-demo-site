@@ -138,6 +138,18 @@ class ApplicationStore:
                 )
                 """
             )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS faq (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    question TEXT NOT NULL,
+                    answer TEXT NOT NULL,
+                    sort_order INTEGER DEFAULT 0,
+                    is_active INTEGER DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
 
     def get_capacity_settings(self) -> dict:
         if self.kind == "postgres":
@@ -453,6 +465,81 @@ class ApplicationStore:
                     (code,),
                 )
 
+    def get_faq_items(self, active_only: bool = True) -> list[dict]:
+        if active_only:
+            query_pg = "SELECT * FROM faq WHERE is_active = 1 ORDER BY sort_order ASC, id ASC"
+            query_sq = "SELECT * FROM faq WHERE is_active = 1 ORDER BY sort_order ASC, id ASC"
+        else:
+            query_pg = "SELECT * FROM faq ORDER BY sort_order ASC, id ASC"
+            query_sq = "SELECT * FROM faq ORDER BY sort_order ASC, id ASC"
+
+        if self.kind == "postgres":
+            rows = self._query_all_postgres(query_pg)
+        else:
+            with self._sqlite_connection() as conn:
+                rows = conn.execute(query_sq).fetchall()
+        return [self._serialize_faq(row) for row in rows]
+
+    def create_faq_item(self, question: str, answer: str, sort_order: int) -> dict:
+        if self.kind == "postgres":
+            row = self._query_one_postgres(
+                """
+                INSERT INTO faq (question, answer, sort_order)
+                VALUES (%s, %s, %s)
+                RETURNING *
+                """,
+                (question, answer, sort_order),
+            )
+            return self._serialize_faq(row)
+        else:
+            with self._sqlite_connection() as conn:
+                cursor = conn.execute(
+                    "INSERT INTO faq (question, answer, sort_order) VALUES (?, ?, ?)",
+                    (question, answer, sort_order),
+                )
+                new_id = cursor.lastrowid
+            with self._sqlite_connection() as conn:
+                row = conn.execute("SELECT * FROM faq WHERE id = ?", (new_id,)).fetchone()
+            return self._serialize_faq(row)
+
+    def update_faq_item(self, faq_id: int, question: str, answer: str, sort_order: int, is_active: int) -> dict | None:
+        if self.kind == "postgres":
+            row = self._query_one_postgres(
+                """
+                UPDATE faq SET question = %s, answer = %s, sort_order = %s, is_active = %s
+                WHERE id = %s
+                RETURNING *
+                """,
+                (question, answer, sort_order, is_active, faq_id),
+            )
+            if not row:
+                return None
+            return self._serialize_faq(row)
+        else:
+            with self._sqlite_connection() as conn:
+                conn.execute(
+                    "UPDATE faq SET question = ?, answer = ?, sort_order = ?, is_active = ? WHERE id = ?",
+                    (question, answer, sort_order, is_active, faq_id),
+                )
+            with self._sqlite_connection() as conn:
+                row = conn.execute("SELECT * FROM faq WHERE id = ?", (faq_id,)).fetchone()
+            if not row:
+                return None
+            return self._serialize_faq(row)
+
+    def delete_faq_item(self, faq_id: int) -> None:
+        if self.kind == "postgres":
+            self._query_one_postgres("DELETE FROM faq WHERE id = %s", (faq_id,))
+        else:
+            with self._sqlite_connection() as conn:
+                conn.execute("DELETE FROM faq WHERE id = ?", (faq_id,))
+
+    def _serialize_faq(self, row) -> dict:
+        data = dict(row)
+        if "created_at" in data:
+            data["created_at"] = self._to_iso8601(data["created_at"])
+        return data
+
     def _normalize_payload(self, payload: dict) -> dict:
         name = self._require_text(payload.get("name"), "이름", 40)
         phone = re.sub(r"[^0-9]", "", str(payload.get("phone", "")))
@@ -642,6 +729,18 @@ class ApplicationStore:
                         max_uses INTEGER NOT NULL DEFAULT 0,
                         used_count INTEGER NOT NULL DEFAULT 0,
                         is_active INTEGER NOT NULL DEFAULT 1,
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    )
+                    """
+                )
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS faq (
+                        id SERIAL PRIMARY KEY,
+                        question TEXT NOT NULL,
+                        answer TEXT NOT NULL,
+                        sort_order INTEGER DEFAULT 0,
+                        is_active INTEGER DEFAULT 1,
                         created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
                     )
                     """
@@ -840,6 +939,16 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._write_json(200, {"discount_codes": STORE.get_discount_codes()})
             return
 
+        if parsed.path == "/api/faq":
+            self._write_json(200, {"faq": STORE.get_faq_items(active_only=True)})
+            return
+
+        if parsed.path == "/api/admin/faq":
+            if not self._require_admin():
+                return
+            self._write_json(200, {"faq": STORE.get_faq_items(active_only=False)})
+            return
+
         if parsed.path == "/api/discount/validate":
             params = parse_qs(parsed.query)
             code = params.get("code", [""])[0].strip()
@@ -962,6 +1071,60 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
                 payload = self._read_payload()
                 pricing_json = json.dumps(payload.get("pricing", {}))
                 STORE.upsert_site_content({"pricing": pricing_json})
+                self._write_json(200, {"ok": True})
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
+        if parsed.path == "/api/admin/faq":
+            if not self._require_admin():
+                return
+            try:
+                payload = self._read_payload()
+                question = str(payload.get("question", "")).strip()
+                answer = str(payload.get("answer", "")).strip()
+                sort_order = int(payload.get("sort_order", 0))
+                if not question or not answer:
+                    self._write_json(400, {"error": "질문과 답변을 모두 입력해 주세요."})
+                    return
+                result = STORE.create_faq_item(question, answer, sort_order)
+                self._write_json(201, {"faq": result})
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
+        if parsed.path == "/api/admin/faq/update":
+            if not self._require_admin():
+                return
+            try:
+                payload = self._read_payload()
+                faq_id = int(payload.get("id", 0))
+                question = str(payload.get("question", "")).strip()
+                answer = str(payload.get("answer", "")).strip()
+                sort_order = int(payload.get("sort_order", 0))
+                is_active = int(payload.get("is_active", 1))
+                if not faq_id or not question or not answer:
+                    self._write_json(400, {"error": "필수 항목이 누락되었습니다."})
+                    return
+                result = STORE.update_faq_item(faq_id, question, answer, sort_order, is_active)
+                if not result:
+                    self._write_json(404, {"error": "해당 FAQ를 찾을 수 없습니다."})
+                    return
+                self._write_json(200, {"faq": result})
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
+        if parsed.path == "/api/admin/faq/delete":
+            if not self._require_admin():
+                return
+            try:
+                payload = self._read_payload()
+                faq_id = int(payload.get("id", 0))
+                if not faq_id:
+                    self._write_json(400, {"error": "FAQ ID가 필요합니다."})
+                    return
+                STORE.delete_faq_item(faq_id)
                 self._write_json(200, {"ok": True})
             except Exception as exc:
                 self._write_json(500, {"error": str(exc)})

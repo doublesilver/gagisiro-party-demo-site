@@ -143,6 +143,57 @@ if (track) {
   } catch { /* no backend */ }
 })();
 
+/* --- FAQ dynamic loading --- */
+(async function loadFaq() {
+  const container = document.getElementById('faq-list-container');
+  if (!container) return;
+
+  const FALLBACK_FAQ = [
+    { question: '혼자 가도 괜찮을까요?', answer: '네, 전혀 문제 없습니다! ODD PARTY는 처음 만나는 분들이 어색함 없이 어울릴 수 있도록 다양한 아이스브레이킹 프로그램을 운영합니다. 혼자 오시는 분들이 오히려 더 다양한 만남을 경험하세요.' },
+    { question: '참가 연령 제한이 있나요?', answer: '만 20세 이상 37세 이하를 대상으로 합니다. 보다 편안한 분위기를 위해 연령대를 적절히 조율하여 운영하고 있습니다.' },
+    { question: '입금 후 취소/환불이 가능한가요?', answer: '파티 4일 전까지 전액 환불이 가능합니다. 3일 전~당일 취소는 환불이 불가합니다. 취소 문의는 카카오톡 채널로 연락해 주세요.' },
+    { question: '어떤 프로그램이 진행되나요?', answer: '아이스브레이킹 게임, 테이블 토크, 자유 네트워킹 타임 등으로 구성되며, 매회 조금씩 새로운 프로그램이 추가됩니다. 음료와 간단한 스낵도 제공됩니다.' },
+    { question: '신청 후 어떻게 확인하나요?', answer: '입금 완료 후 24시간 이내 문자 또는 카카오톡으로 확정 안내를 보내드립니다. 입금 계좌는 신청 완료 화면에서 확인하실 수 있습니다.' },
+  ];
+
+  let items = FALLBACK_FAQ;
+  try {
+    const res = await fetch('https://oddparty-api-production.up.railway.app/api/faq');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.faq && data.faq.length > 0) items = data.faq;
+    }
+  } catch { /* use fallback */ }
+
+  container.innerHTML = items.map(f => `
+    <li class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="faq-q-text">${f.question}</span>
+        <span class="faq-icon" aria-hidden="true">+</span>
+      </button>
+      <div class="faq-a" role="region">
+        <div class="faq-a-inner">${f.answer}</div>
+      </div>
+    </li>
+  `).join('');
+
+  // Re-bind accordion
+  container.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      container.querySelectorAll('.faq-item.open').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+})();
+
 /* --- Scroll fade-up --- */
 const fadeObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });

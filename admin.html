@@ -800,6 +800,7 @@
       <button class="admin-tab-btn active" data-target="sec-dashboard">대시보드</button>
       <button class="admin-tab-btn" data-target="sec-capacity">날짜별 정원</button>
       <button class="admin-tab-btn" data-target="sec-pricing">가격 설정</button>
+      <button class="admin-tab-btn" data-target="sec-faq">FAQ</button>
       <button class="admin-tab-btn" data-target="sec-discount">할인코드</button>
       <button class="admin-tab-btn" data-target="sec-content">문구 수정</button>
       <button class="admin-tab-btn" data-target="sec-settings">설정</button>
@@ -824,6 +825,11 @@
           <li class="sidebar-nav-item">
             <button class="sidebar-nav-btn" data-target="sec-pricing" type="button">
               <span class="sidebar-nav-icon">💰</span> 가격 설정
+            </button>
+          </li>
+          <li class="sidebar-nav-item">
+            <button class="sidebar-nav-btn" data-target="sec-faq" type="button">
+              <span class="sidebar-nav-icon">❓</span> 자주 묻는 질문
             </button>
           </li>
           <li class="sidebar-nav-item">
@@ -1103,6 +1109,34 @@
           </div>
         </section>
 
+        <!-- ── FAQ 관리 ── -->
+        <section class="admin-section" id="sec-faq">
+          <h2 class="admin-section-title">자주 묻는 질문 관리</h2>
+          <p style="color:var(--muted);font-size:var(--fs-sm);margin-bottom:var(--sp-lg);">메인 페이지에 표시되는 FAQ를 추가, 수정, 삭제할 수 있습니다.</p>
+
+          <div class="content-group">
+            <p class="content-group-title">새 질문 추가</p>
+            <div style="margin-bottom:12px;">
+              <label class="content-label">질문</label>
+              <input class="settings-input" type="text" id="faq-new-question" placeholder="예: 혼자 가도 괜찮을까요?" style="width:100%;" />
+            </div>
+            <div style="margin-bottom:12px;">
+              <label class="content-label">답변</label>
+              <textarea class="content-textarea" id="faq-new-answer" rows="3" placeholder="답변을 입력하세요" style="width:100%;"></textarea>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label class="content-label">표시 순서 (숫자가 작을수록 위에 표시)</label>
+              <input class="settings-input" type="number" id="faq-new-order" value="0" style="width:100px;" />
+            </div>
+            <button class="btn-primary" type="button" onclick="createFaq()">질문 추가</button>
+          </div>
+
+          <div class="content-group" style="margin-top:var(--sp-xl);">
+            <p class="content-group-title">등록된 질문 목록</p>
+            <div id="faq-list"><p style="color:var(--muted);font-size:var(--fs-sm);">불러오는 중…</p></div>
+          </div>
+        </section>
+
         <!-- ── 할인코드 관리 ── -->
         <section class="admin-section" id="sec-discount">
           <h2 class="admin-section-title">할인코드 관리</h2>
@@ -1369,6 +1403,7 @@
       if (targetId === 'sec-dashboard') loadDashboard();
       if (targetId === 'sec-capacity') loadCapacity();
       if (targetId === 'sec-pricing')  loadPricing();
+      if (targetId === 'sec-faq')      loadFaqList();
       if (targetId === 'sec-content')  loadSiteContent();
     }
 
@@ -1669,6 +1704,82 @@
       'complete-title', 'complete-sub',
       'complete-notice-title', 'complete-notice-body'
     ];
+
+    /* ── FAQ ── */
+    function loadFaqList() {
+      fetch(API_BASE + '/api/admin/faq', { headers: authHeaders() })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) {
+          var el = document.getElementById('faq-list');
+          if (!d || !d.faq || d.faq.length === 0) {
+            el.innerHTML = '<p style="color:var(--muted);font-size:var(--fs-sm);">등록된 질문이 없습니다.</p>';
+            return;
+          }
+          el.innerHTML = d.faq.map(function(f) {
+            return '<div class="content-group" style="border:1px solid var(--border);padding:12px;border-radius:8px;margin-bottom:12px;">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+              '<strong style="font-size:var(--fs-sm);">Q. ' + f.question.substring(0, 40) + '</strong>' +
+              '<span style="font-size:var(--fs-xs);color:var(--muted);">순서: ' + f.sort_order + '</span></div>' +
+              '<input class="settings-input" type="text" id="faq-q-' + f.id + '" value="' + f.question.replace(/"/g, '&quot;') + '" style="width:100%;margin-bottom:8px;" />' +
+              '<textarea class="content-textarea" id="faq-a-' + f.id + '" rows="2" style="width:100%;margin-bottom:8px;">' + f.answer + '</textarea>' +
+              '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+              '<input class="settings-input" type="number" id="faq-o-' + f.id + '" value="' + f.sort_order + '" style="width:80px;" />' +
+              '<label style="font-size:var(--fs-xs);display:flex;align-items:center;gap:4px;">' +
+              '<input type="checkbox" id="faq-active-' + f.id + '"' + (f.is_active ? ' checked' : '') + '> 표시</label>' +
+              '<button class="btn-primary" type="button" onclick="updateFaq(' + f.id + ')" style="font-size:var(--fs-xs);padding:4px 12px;">저장</button>' +
+              '<button type="button" onclick="deleteFaq(' + f.id + ')" style="font-size:var(--fs-xs);padding:4px 12px;background:#e74c3c;color:#fff;border:none;border-radius:6px;cursor:pointer;">삭제</button>' +
+              '</div></div>';
+          }).join('');
+        })
+        .catch(function() {
+          document.getElementById('faq-list').innerHTML = '<p style="color:var(--muted);font-size:var(--fs-sm);">FAQ를 불러오지 못했습니다.</p>';
+        });
+    }
+
+    function createFaq() {
+      var question = document.getElementById('faq-new-question').value.trim();
+      var answer = document.getElementById('faq-new-answer').value.trim();
+      var sort_order = parseInt(document.getElementById('faq-new-order').value) || 0;
+      if (!question || !answer) { showToast('질문과 답변을 모두 입력해 주세요.', true); return; }
+      fetch(API_BASE + '/api/admin/faq', {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ question: question, answer: answer, sort_order: sort_order })
+      })
+      .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function() {
+        showToast('질문이 추가되었습니다.');
+        document.getElementById('faq-new-question').value = '';
+        document.getElementById('faq-new-answer').value = '';
+        document.getElementById('faq-new-order').value = '0';
+        loadFaqList();
+      })
+      .catch(function() { showToast('질문 추가에 실패했습니다.', true); });
+    }
+
+    function updateFaq(id) {
+      var question = document.getElementById('faq-q-' + id).value.trim();
+      var answer = document.getElementById('faq-a-' + id).value.trim();
+      var sort_order = parseInt(document.getElementById('faq-o-' + id).value) || 0;
+      var is_active = document.getElementById('faq-active-' + id).checked ? 1 : 0;
+      fetch(API_BASE + '/api/admin/faq/update', {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ id: id, question: question, answer: answer, sort_order: sort_order, is_active: is_active })
+      })
+      .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function() { showToast('질문이 수정되었습니다.'); loadFaqList(); })
+      .catch(function() { showToast('수정에 실패했습니다.', true); });
+    }
+
+    function deleteFaq(id) {
+      if (!confirm('이 질문을 삭제하시겠습니까?')) return;
+      fetch(API_BASE + '/api/admin/faq/delete', {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ id: id })
+      })
+      .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function() { showToast('질문이 삭제되었습니다.'); loadFaqList(); })
+      .catch(function() { showToast('삭제에 실패했습니다.', true); });
+    }
 
     /* ── Pricing ── */
     function loadPricing() {
