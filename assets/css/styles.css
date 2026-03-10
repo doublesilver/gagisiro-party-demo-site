@@ -478,7 +478,7 @@ input {
 /* ============================================================
    INTRO SECTION
    ============================================================ */
-.intro-section { background: var(--card); }
+.intro-section { background: transparent; }
 .intro-body { margin-bottom: var(--sp-xl); }
 .intro-body p + p { margin-top: var(--sp-md); }
 .chip-row {
@@ -490,7 +490,7 @@ input {
 /* ============================================================
    FAQ ACCORDION
    ============================================================ */
-.faq-section { background: var(--bg-subtle); }
+.faq-section { background: transparent; }
 .faq-list {
   display: flex;
   flex-direction: column;
@@ -560,7 +560,7 @@ input {
 /* ============================================================
    PRICE CARDS
    ============================================================ */
-.price-section { background: var(--card); }
+.price-section { background: transparent; }
 .price-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -647,7 +647,7 @@ input {
 /* ============================================================
    GALLERY CAROUSEL
    ============================================================ */
-.gallery-section { background: var(--bg-subtle); overflow: hidden; }
+.gallery-section { background: transparent; overflow: hidden; }
 .gallery-track-wrap {
   overflow: hidden;
   margin: 0 calc(-1 * var(--sp-xl));
@@ -713,7 +713,7 @@ input {
 /* ============================================================
    CTA SECTION
    ============================================================ */
-.cta-section { background: var(--card); }
+.cta-section { background: transparent; }
 .cta-card {
   background: var(--bg-subtle);
   border: 1px solid var(--border);
