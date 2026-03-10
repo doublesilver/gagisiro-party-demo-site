@@ -58,6 +58,7 @@
       outline: none;
       transition: border-color 0.2s;
       margin-bottom: var(--sp-md);
+      box-sizing: border-box;
     }
     .login-input:focus {
       border-color: var(--primary);
@@ -230,7 +231,7 @@
     .admin-main {
       flex: 1;
       padding: var(--sp-2xl) var(--sp-xl);
-      max-width: 860px;
+      min-width: 0;
     }
 
     /* ── Section panels ── */
@@ -281,10 +282,193 @@
       font-size: var(--fs-xs);
       color: var(--muted);
     }
-    .stat-card-accent { border-top: 3px solid var(--primary); }
+    .stat-card-accent  { border-top: 3px solid var(--primary); }
     .stat-card-accent2 { border-top: 3px solid var(--accent); }
     .stat-card-accent3 { border-top: 3px solid var(--cyan); }
     .stat-card-accent4 { border-top: 3px solid var(--pink); }
+
+    /* ── Toolbar (search/filter/export) ── */
+    .dash-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-lg);
+    }
+    .dash-search {
+      flex: 1;
+      min-width: 160px;
+      padding: 9px 14px;
+      font-family: var(--font);
+      font-size: var(--fs-sm);
+      color: var(--ink);
+      background: var(--bg-subtle);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .dash-search:focus { border-color: var(--primary); }
+    .dash-select {
+      padding: 9px 14px;
+      font-family: var(--font);
+      font-size: var(--fs-sm);
+      color: var(--ink);
+      background: var(--bg-subtle);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      outline: none;
+      cursor: pointer;
+    }
+    .dash-select option { background: var(--card); }
+    .dash-btn {
+      padding: 9px 18px;
+      font-family: var(--font);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--ink);
+      background: var(--bg-subtle);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .dash-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .dash-btn-primary {
+      color: #fff;
+      background: var(--gradient-btn);
+      border-color: transparent;
+    }
+    .dash-btn-primary:hover { opacity: 0.88; color: #fff; border-color: transparent; }
+
+    /* ── Applications table wrapper ── */
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+      margin-bottom: var(--sp-lg);
+    }
+    .app-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--fs-xs);
+      min-width: 860px;
+    }
+    .app-table th {
+      padding: 10px 10px;
+      text-align: left;
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      background: var(--bg-subtle);
+    }
+    .app-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
+      vertical-align: middle;
+    }
+    .app-table tr:last-child td { border-bottom: none; }
+    .app-table tr:hover td { background: rgba(167,139,250,0.04); }
+    .app-table .cell-id {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: monospace;
+    }
+    .app-table .cell-name {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .app-table .cell-phone {
+      color: var(--ink-sub);
+      white-space: nowrap;
+    }
+    .app-table .cell-coupon {
+      font-size: var(--fs-xs);
+      color: var(--cyan);
+    }
+    .status-select {
+      padding: 4px 8px;
+      font-family: var(--font);
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      border-radius: var(--r-full);
+      border: 1.5px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--ink);
+      cursor: pointer;
+      outline: none;
+    }
+    .status-select option { background: var(--card); }
+    .status-select[data-status="입금완료"] { border-color: #22c55e; color: #22c55e; }
+    .status-select[data-status="입금대기"] { border-color: var(--primary); color: var(--primary); }
+    .status-select[data-status="보류"]    { border-color: #facc15; color: #facc15; }
+    .status-select[data-status="취소"]    { border-color: var(--accent); color: var(--accent); }
+    .status-select[data-status="환불"]    { border-color: var(--muted); color: var(--muted); }
+    .note-input {
+      width: 120px;
+      padding: 4px 8px;
+      font-family: var(--font);
+      font-size: var(--fs-xs);
+      color: var(--ink);
+      background: var(--bg-subtle);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .note-input:focus { border-color: var(--primary); }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-2xl);
+    }
+    .page-btn {
+      padding: 6px 14px;
+      font-family: var(--font);
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .page-btn:hover { color: var(--primary); border-color: var(--primary); }
+    .page-btn.active { color: var(--primary); border-color: var(--primary); background: var(--primary-soft); }
+    .page-btn:disabled { opacity: 0.4; cursor: default; }
+    .page-info {
+      font-size: var(--fs-xs);
+      color: var(--muted);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: var(--fs-sm);
+    }
+
+    /* ── Loading spinner ── */
+    .loading-row td {
+      padding: 32px;
+      text-align: center;
+      color: var(--muted);
+      font-size: var(--fs-sm);
+    }
 
     /* ── Content management fields ── */
     .content-group {
@@ -339,6 +523,7 @@
       transition: border-color 0.2s;
       line-height: 1.6;
       min-height: 60px;
+      box-sizing: border-box;
     }
     .content-textarea:focus {
       border-color: var(--primary);
@@ -388,25 +573,184 @@
     }
     .save-success-msg.visible { display: inline; }
 
+    /* ── Capacity section ── */
+    .capacity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-lg);
+      margin-bottom: var(--sp-xl);
+    }
+    .capacity-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      padding: var(--sp-xl);
+    }
+    .capacity-card-day {
+      font-size: var(--fs-md);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: var(--sp-sm);
+    }
+    .capacity-bar-wrap {
+      background: var(--bg-subtle);
+      border-radius: var(--r-full);
+      height: 8px;
+      margin: var(--sp-sm) 0;
+      overflow: hidden;
+    }
+    .capacity-bar {
+      height: 100%;
+      border-radius: var(--r-full);
+      background: var(--gradient-btn);
+      transition: width 0.4s ease;
+    }
+    .capacity-bar.level-low  { background: #22c55e; }
+    .capacity-bar.level-mid  { background: #facc15; }
+    .capacity-bar.level-high { background: var(--accent); }
+    .capacity-stat {
+      font-size: var(--fs-sm);
+      color: var(--ink-sub);
+      margin-bottom: var(--sp-md);
+    }
+    .capacity-input-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .capacity-input {
+      width: 72px;
+      padding: 7px 10px;
+      font-family: var(--font);
+      font-size: var(--fs-sm);
+      color: var(--ink);
+      background: var(--bg-subtle);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      outline: none;
+      text-align: center;
+    }
+    .capacity-input:focus { border-color: var(--primary); }
+    .capacity-save-btn {
+      flex: 1;
+      padding: 7px 14px;
+      font-family: var(--font);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      color: #fff;
+      background: var(--gradient-btn);
+      border: none;
+      border-radius: var(--r-md);
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .capacity-save-btn:hover { opacity: 0.88; }
+
+    /* ── Settings section ── */
+    .settings-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      padding: var(--sp-xl);
+      max-width: 420px;
+    }
+    .settings-card-title {
+      font-size: var(--fs-base);
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: var(--sp-lg);
+      padding-bottom: var(--sp-sm);
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-field {
+      margin-bottom: var(--sp-lg);
+    }
+    .settings-label {
+      display: block;
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .settings-input {
+      width: 100%;
+      padding: 10px 14px;
+      font-family: var(--font);
+      font-size: var(--fs-sm);
+      color: var(--ink);
+      background: var(--bg-subtle);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      outline: none;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .settings-input:focus { border-color: var(--primary); }
+    .settings-submit {
+      width: 100%;
+      padding: 12px;
+      font-family: var(--font);
+      font-size: var(--fs-base);
+      font-weight: 700;
+      color: #fff;
+      background: var(--gradient-btn);
+      border: none;
+      border-radius: var(--r-md);
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .settings-submit:hover { opacity: 0.9; }
+    .settings-submit:active { transform: scale(0.98); }
+    .settings-msg {
+      display: none;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      margin-top: var(--sp-sm);
+    }
+    .settings-msg.ok  { display: block; color: #22c55e; }
+    .settings-msg.err { display: block; color: var(--accent); }
+
+    /* ── Toast notification ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #22c55e;
+      color: #fff;
+      font-family: var(--font);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: var(--r-full);
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .toast.err { background: var(--accent); }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
     /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .capacity-grid { grid-template-columns: 1fr; }
+    }
     @media (max-width: 768px) {
       .admin-sidebar { display: none; }
       .admin-tabs { display: flex; }
-      .admin-main {
-        padding: var(--sp-lg);
-      }
-      .stat-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--sp-md);
-      }
-      .save-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--sp-sm);
-      }
+      .admin-main { padding: var(--sp-lg); }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); gap: var(--sp-md); }
+      .save-bar { flex-direction: column; align-items: stretch; gap: var(--sp-sm); }
       .save-btn { width: 100%; text-align: center; }
+      .dash-toolbar { flex-direction: column; align-items: stretch; }
+      .dash-search { min-width: unset; }
     }
-
     @media (max-width: 400px) {
       .login-card { padding: 32px 20px; }
     }
@@ -421,7 +765,7 @@
       <img src="assets/images/logo-light.png" alt="ODD PARTY" class="login-logo logo-light" style="display:none;" />
       <h1 class="login-title">관리자 로그인</h1>
       <p class="login-subtitle">ODD PARTY 관리자 전용 페이지입니다.</p>
-      <form id="login-form" onsubmit="handleLogin(event)">
+      <form id="login-form">
         <input
           class="login-input"
           type="password"
@@ -447,16 +791,16 @@
       </a>
       <div class="admin-header-right">
         <span class="admin-badge">Admin</span>
-        <button class="logout-btn" onclick="handleLogout()" type="button">로그아웃</button>
+        <button class="logout-btn" id="logout-btn" type="button">로그아웃</button>
       </div>
     </header>
 
     <!-- Mobile top tabs -->
     <div class="admin-tabs" id="admin-tabs">
-      <button class="admin-tab-btn active" data-target="sec-dashboard" onclick="switchSection('sec-dashboard', this)">대시보드</button>
-      <button class="admin-tab-btn" data-target="sec-main" onclick="switchSection('sec-main', this)">메인페이지</button>
-      <button class="admin-tab-btn" data-target="sec-form" onclick="switchSection('sec-form', this)">신청페이지</button>
-      <button class="admin-tab-btn" data-target="sec-complete" onclick="switchSection('sec-complete', this)">완료페이지</button>
+      <button class="admin-tab-btn active" data-target="sec-dashboard">대시보드</button>
+      <button class="admin-tab-btn" data-target="sec-capacity">정원 관리</button>
+      <button class="admin-tab-btn" data-target="sec-content">콘텐츠 관리</button>
+      <button class="admin-tab-btn" data-target="sec-settings">설정</button>
     </div>
 
     <!-- Body -->
@@ -466,23 +810,23 @@
       <aside class="admin-sidebar">
         <ul class="sidebar-nav" role="list">
           <li class="sidebar-nav-item">
-            <button class="sidebar-nav-btn active" data-target="sec-dashboard" onclick="switchSection('sec-dashboard', this)" type="button">
+            <button class="sidebar-nav-btn active" data-target="sec-dashboard" type="button">
               <span class="sidebar-nav-icon">📊</span> 대시보드
             </button>
           </li>
           <li class="sidebar-nav-item">
-            <button class="sidebar-nav-btn" data-target="sec-main" onclick="switchSection('sec-main', this)" type="button">
-              <span class="sidebar-nav-icon">🏠</span> 메인페이지 관리
+            <button class="sidebar-nav-btn" data-target="sec-capacity" type="button">
+              <span class="sidebar-nav-icon">🗓️</span> 정원 관리
             </button>
           </li>
           <li class="sidebar-nav-item">
-            <button class="sidebar-nav-btn" data-target="sec-form" onclick="switchSection('sec-form', this)" type="button">
-              <span class="sidebar-nav-icon">📝</span> 신청페이지 관리
+            <button class="sidebar-nav-btn" data-target="sec-content" type="button">
+              <span class="sidebar-nav-icon">✏️</span> 콘텐츠 관리
             </button>
           </li>
           <li class="sidebar-nav-item">
-            <button class="sidebar-nav-btn" data-target="sec-complete" onclick="switchSection('sec-complete', this)" type="button">
-              <span class="sidebar-nav-icon">✅</span> 완료페이지 관리
+            <button class="sidebar-nav-btn" data-target="sec-settings" type="button">
+              <span class="sidebar-nav-icon">⚙️</span> 설정
             </button>
           </li>
         </ul>
@@ -494,207 +838,306 @@
         <!-- ── 대시보드 ── -->
         <section class="admin-section active" id="sec-dashboard">
           <h2 class="admin-section-title">대시보드</h2>
+
+          <!-- Stat cards -->
           <div class="stat-grid">
             <div class="stat-card stat-card-accent">
               <span class="stat-card-label">총 신청</span>
-              <span class="stat-card-value">—</span>
+              <span class="stat-card-value" id="stat-total">—</span>
               <span class="stat-card-sub">누적 신청자 수</span>
             </div>
             <div class="stat-card stat-card-accent2">
               <span class="stat-card-label">오늘 신청</span>
-              <span class="stat-card-value">—</span>
+              <span class="stat-card-value" id="stat-today">—</span>
               <span class="stat-card-sub">오늘 접수된 신청</span>
             </div>
             <div class="stat-card stat-card-accent3">
-              <span class="stat-card-label">지점별</span>
-              <span class="stat-card-value">—</span>
-              <span class="stat-card-sub">건대 / 영등포</span>
+              <span class="stat-card-label">쿠폰 사용</span>
+              <span class="stat-card-value" id="stat-coupon">—</span>
+              <span class="stat-card-sub">쿠폰 신청자 수</span>
             </div>
             <div class="stat-card stat-card-accent4">
               <span class="stat-card-label">요일별</span>
-              <span class="stat-card-value">—</span>
-              <span class="stat-card-sub">금 / 토 / 일</span>
+              <span class="stat-card-value" id="stat-days">—</span>
+              <span class="stat-card-sub" id="stat-days-sub">금 / 토 / 일</span>
             </div>
           </div>
-          <div class="content-group">
-            <p class="content-group-title">안내</p>
-            <p style="font-size:var(--fs-sm);color:var(--muted);line-height:1.8;">
-              이 대시보드는 향후 신청 데이터 연동 시 자동으로 채워집니다.<br/>
-              현재는 콘텐츠 관리 기능을 통해 각 페이지 텍스트를 수정하고 저장할 수 있습니다.<br/>
-              저장된 내용은 브라우저 localStorage에 보관됩니다.
-            </p>
+
+          <!-- Toolbar -->
+          <div class="dash-toolbar">
+            <input class="dash-search" type="search" id="app-search" placeholder="이름·전화번호 검색…" />
+            <select class="dash-select" id="filter-status">
+              <option value="">전체 상태</option>
+              <option value="입금대기">입금대기</option>
+              <option value="입금완료">입금완료</option>
+              <option value="보류">보류</option>
+              <option value="취소">취소</option>
+              <option value="환불">환불</option>
+            </select>
+            <select class="dash-select" id="filter-branch">
+              <option value="">전체 지점</option>
+              <option value="건대">건대</option>
+              <option value="영등포">영등포</option>
+            </select>
+            <button class="dash-btn" id="btn-export-csv" type="button">📥 CSV</button>
+            <button class="dash-btn" id="btn-backup" type="button">💾 백업</button>
+            <button class="dash-btn dash-btn-primary" id="btn-refresh" type="button">↻ 새로고침</button>
+          </div>
+
+          <!-- Table -->
+          <div class="table-wrap">
+            <table class="app-table">
+              <thead>
+                <tr>
+                  <th>신청일시</th>
+                  <th>이름(나이)</th>
+                  <th>전화번호</th>
+                  <th>지점/금액</th>
+                  <th>파티날짜</th>
+                  <th>쿠폰</th>
+                  <th>상태</th>
+                  <th>관리자 메모</th>
+                  <th>ID</th>
+                </tr>
+              </thead>
+              <tbody id="app-tbody">
+                <tr class="loading-row"><td colspan="9">불러오는 중…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" id="pagination"></div>
+        </section>
+
+        <!-- ── 정원 관리 ── -->
+        <section class="admin-section" id="sec-capacity">
+          <h2 class="admin-section-title">정원 관리</h2>
+          <div class="capacity-grid" id="capacity-grid">
+            <div class="content-group" style="text-align:center;color:var(--muted);">불러오는 중…</div>
           </div>
         </section>
 
-        <!-- ── 메인페이지 관리 ── -->
-        <section class="admin-section" id="sec-main">
-          <h2 class="admin-section-title">메인페이지 관리</h2>
+        <!-- ── 콘텐츠 관리 ── -->
+        <section class="admin-section" id="sec-content">
+          <h2 class="admin-section-title">콘텐츠 관리</h2>
 
+          <!-- 히어로 -->
           <div class="content-group">
             <p class="content-group-title">히어로 섹션</p>
             <div class="content-field">
               <label class="content-label" for="main-hero-title">히어로 타이틀 <span>(index.html · .hero-title)</span></label>
-              <textarea class="content-textarea" id="main-hero-title" rows="2">낯선 사람들이 만나는 밤</textarea>
+              <textarea class="content-textarea" id="main-hero-title" rows="2"></textarea>
             </div>
             <div class="content-field">
               <label class="content-label" for="main-hero-sub">히어로 서브타이틀 <span>(index.html · .hero-sub)</span></label>
-              <textarea class="content-textarea" id="main-hero-sub" rows="2">20~30대 소셜 파티 · ODD PARTY</textarea>
+              <textarea class="content-textarea" id="main-hero-sub" rows="2"></textarea>
             </div>
           </div>
 
+          <!-- About -->
           <div class="content-group">
             <p class="content-group-title">About 섹션</p>
             <div class="content-field">
               <label class="content-label" for="main-about-p1">소개 본문 1단락 <span>(index.html · .intro-body p:first-child)</span></label>
-              <textarea class="content-textarea tall" id="main-about-p1" rows="4">ODD PARTY는 혼자 가도 어색하지 않은 소셜 파티입니다. 직장·학교·동네 어디에서도 만날 수 없는 새로운 인연을 만들어 드립니다. 처음 만나는 사이도 자연스럽게 어울릴 수 있도록, 감각적인 공간과 즐거운 프로그램을 준비했습니다.</textarea>
+              <textarea class="content-textarea tall" id="main-about-p1" rows="4"></textarea>
             </div>
             <div class="content-field">
               <label class="content-label" for="main-about-p2">소개 본문 2단락 <span>(index.html · .intro-body p:last-child)</span></label>
-              <textarea class="content-textarea tall" id="main-about-p2" rows="4">매주 금·토·일 진행되며, 서울 건대 / 영등포 두 지점에서 만나볼 수 있습니다. 20~30대라면 누구나 편하게 신청하실 수 있어요. 혼자 오셔도 충분히 즐길 수 있습니다.</textarea>
+              <textarea class="content-textarea tall" id="main-about-p2" rows="4"></textarea>
             </div>
           </div>
 
+          <!-- 가격 -->
           <div class="content-group">
             <p class="content-group-title">가격 섹션</p>
             <div class="content-field">
               <label class="content-label" for="main-price-info">가격 안내 텍스트 <span>(index.html · .price-info)</span></label>
-              <textarea class="content-textarea tall" id="main-price-info" rows="3">주류및 음료는 모든 지점 제공됩니다! (한잔등 제한 없음)
-할인코드 보유 시 신청 폼 입력란에 기재해 주세요. 할인은 최종 결제 금액에서 차감됩니다.</textarea>
+              <textarea class="content-textarea tall" id="main-price-info" rows="3"></textarea>
             </div>
           </div>
 
+          <!-- CTA -->
           <div class="content-group">
             <p class="content-group-title">CTA 섹션</p>
             <div class="content-field">
               <label class="content-label" for="main-cta-title">CTA 타이틀 <span>(index.html · .cta-title)</span></label>
-              <textarea class="content-textarea" id="main-cta-title" rows="2">자리가 빠르게 마감됩니다</textarea>
+              <textarea class="content-textarea" id="main-cta-title" rows="2"></textarea>
             </div>
             <div class="content-field">
               <label class="content-label" for="main-cta-sub">CTA 서브텍스트 <span>(index.html · .cta-sub)</span></label>
-              <textarea class="content-textarea" id="main-cta-sub" rows="3">매 회차 소수 정예로 진행되어 자리가 빠르게 찹니다.
-친구에게 공유하고 함께 신청해 보세요!</textarea>
+              <textarea class="content-textarea" id="main-cta-sub" rows="3"></textarea>
             </div>
           </div>
-        </section>
 
-        <!-- ── 신청페이지 관리 ── -->
-        <section class="admin-section" id="sec-form">
-          <h2 class="admin-section-title">신청페이지 관리</h2>
-
+          <!-- 신청 폼 -->
           <div class="content-group">
-            <p class="content-group-title">폼 헤더</p>
+            <p class="content-group-title">신청페이지</p>
             <div class="content-field">
               <label class="content-label" for="form-title">폼 타이틀 <span>(form.html · .form-title)</span></label>
-              <textarea class="content-textarea" id="form-title" rows="2">파티 신청</textarea>
+              <textarea class="content-textarea" id="form-title" rows="2"></textarea>
             </div>
             <div class="content-field">
               <label class="content-label" for="form-subtitle">폼 서브타이틀 <span>(form.html · .form-subtitle)</span></label>
-              <textarea class="content-textarea" id="form-subtitle" rows="2">정보를 입력하고 입금까지 완료하시면 신청이 확정됩니다.</textarea>
+              <textarea class="content-textarea" id="form-subtitle" rows="2"></textarea>
             </div>
-          </div>
-
-          <div class="content-group">
-            <p class="content-group-title">제출 안내</p>
             <div class="content-field">
               <label class="content-label" for="form-submit-note">제출 안내 문구 <span>(form.html · .submit-note)</span></label>
-              <textarea class="content-textarea" id="form-submit-note" rows="3">접수 후 입금 완료 시 신청이 확정됩니다.
-계좌: 농협 351-0948-4473-43 (이@봄)</textarea>
+              <textarea class="content-textarea" id="form-submit-note" rows="3"></textarea>
             </div>
-          </div>
-
-          <div class="content-group">
-            <p class="content-group-title">환불 규정</p>
             <div class="content-field">
               <label class="content-label" for="form-refund-title">환불 규정 타이틀 <span>(form.html · .refund-title)</span></label>
-              <textarea class="content-textarea" id="form-refund-title" rows="1">참가비 환불 규정</textarea>
+              <textarea class="content-textarea" id="form-refund-title" rows="1"></textarea>
             </div>
             <div class="content-field">
               <label class="content-label" for="form-refund-list">환불 규정 항목 <span>(form.html · .refund-list, 줄바꿈으로 구분)</span></label>
-              <textarea class="content-textarea tall" id="form-refund-list" rows="6">결제 후 30분 이내 취소: 전액 환불
-승인 대기 중 취소: 전액 환불
-파티 4일 전까지 취소: 전액 환불
-파티 3일 전~당일 취소: 환불 불가
-파티 당일 신청 후 취소: 환불 불가</textarea>
+              <textarea class="content-textarea tall" id="form-refund-list" rows="6"></textarea>
             </div>
             <div class="content-field">
               <label class="content-label" for="form-refund-notice">환불 규정 주의사항 <span>(form.html · .refund-notice)</span></label>
-              <textarea class="content-textarea tall" id="form-refund-notice" rows="3">* 파티내에서는 촬영이 있을 수 있습니다. 파티 참여는 초상권 동의에 해당합니다. (추후 영상은 얼굴 식별이 불가한 수준으로 모자이크 처리하니 안심하세요!)</textarea>
+              <textarea class="content-textarea tall" id="form-refund-notice" rows="3"></textarea>
+            </div>
+          </div>
+
+          <!-- 완료 페이지 -->
+          <div class="content-group">
+            <p class="content-group-title">완료페이지</p>
+            <div class="content-field">
+              <label class="content-label" for="complete-title">완료 타이틀 <span>(complete.html · .success-title)</span></label>
+              <textarea class="content-textarea" id="complete-title" rows="2"></textarea>
+            </div>
+            <div class="content-field">
+              <label class="content-label" for="complete-sub">완료 서브텍스트 <span>(complete.html · .success-sub)</span></label>
+              <textarea class="content-textarea" id="complete-sub" rows="3"></textarea>
+            </div>
+            <div class="content-field">
+              <label class="content-label" for="complete-notice-title">안내 박스 타이틀 <span>(complete.html · .notice-box-title)</span></label>
+              <textarea class="content-textarea" id="complete-notice-title" rows="1"></textarea>
+            </div>
+            <div class="content-field">
+              <label class="content-label" for="complete-notice-body">안내 박스 본문 <span>(complete.html · .notice-box p:last-child)</span></label>
+              <textarea class="content-textarea tall" id="complete-notice-body" rows="3"></textarea>
             </div>
           </div>
         </section>
 
-        <!-- ── 완료페이지 관리 ── -->
-        <section class="admin-section" id="sec-complete">
-          <h2 class="admin-section-title">완료페이지 관리</h2>
-
-          <div class="content-group">
-            <p class="content-group-title">완료 히어로</p>
-            <div class="content-field">
-              <label class="content-label" for="complete-title">완료 타이틀 <span>(complete.html · .success-title)</span></label>
-              <textarea class="content-textarea" id="complete-title" rows="2">신청이 완료되었습니다</textarea>
-            </div>
-            <div class="content-field">
-              <label class="content-label" for="complete-sub">완료 서브텍스트 <span>(complete.html · .success-sub)</span></label>
-              <textarea class="content-textarea" id="complete-sub" rows="3">입금 완료 시 신청이 최종 확정됩니다.
-아래 계좌로 참가비를 입금해 주세요.</textarea>
-            </div>
-          </div>
-
-          <div class="content-group">
-            <p class="content-group-title">확정 안내 박스</p>
-            <div class="content-field">
-              <label class="content-label" for="complete-notice-title">안내 박스 타이틀 <span>(complete.html · .notice-box-title)</span></label>
-              <textarea class="content-textarea" id="complete-notice-title" rows="1">확정 안내</textarea>
-            </div>
-            <div class="content-field">
-              <label class="content-label" for="complete-notice-body">안내 박스 본문 <span>(complete.html · .notice-box p:last-child)</span></label>
-              <textarea class="content-textarea tall" id="complete-notice-body" rows="3">입금 완료 후 24시간 이내 문자 또는 카카오톡으로 확정 안내를 드립니다. 문의사항은 카카오톡 채널 @ODD파티로 연락주세요.</textarea>
-            </div>
+        <!-- ── 설정 ── -->
+        <section class="admin-section" id="sec-settings">
+          <h2 class="admin-section-title">설정</h2>
+          <div class="settings-card">
+            <p class="settings-card-title">비밀번호 변경</p>
+            <form id="pw-form">
+              <div class="settings-field">
+                <label class="settings-label" for="pw-current">현재 비밀번호</label>
+                <input class="settings-input" type="password" id="pw-current" autocomplete="current-password" placeholder="현재 비밀번호" />
+              </div>
+              <div class="settings-field">
+                <label class="settings-label" for="pw-new">새 비밀번호</label>
+                <input class="settings-input" type="password" id="pw-new" autocomplete="new-password" placeholder="새 비밀번호" />
+              </div>
+              <div class="settings-field">
+                <label class="settings-label" for="pw-confirm">새 비밀번호 확인</label>
+                <input class="settings-input" type="password" id="pw-confirm" autocomplete="new-password" placeholder="새 비밀번호 확인" />
+              </div>
+              <button class="settings-submit" type="submit">비밀번호 변경</button>
+              <p class="settings-msg" id="pw-msg"></p>
+            </form>
           </div>
         </section>
 
       </main>
     </div>
 
-    <!-- Save bar (visible on content sections) -->
+    <!-- Save bar (content section only) -->
     <div class="save-bar" id="save-bar" style="display:none;">
       <span>
         <span class="save-bar-hint">변경 사항은 저장 버튼을 눌러야 반영됩니다.</span>
         <span class="save-success-msg" id="save-success-msg">저장되었습니다!</span>
       </span>
-      <button class="save-btn" onclick="saveContent()" type="button">저장하기</button>
+      <button class="save-btn" id="save-content-btn" type="button">저장하기</button>
     </div>
 
   </div><!-- /#admin-shell -->
 
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
   <script>
     /* ============================================================
-       CONSTANTS
+       CONFIG
     ============================================================ */
-    var ADMIN_PW = 'oddparty2026';
-    var LS_AUTH  = 'oddparty_admin_auth';
-    var LS_CONTENT = 'oddparty_admin_content';
+    var API_BASE = '';           // same-origin
+    var LS_TOKEN = 'admin_token';
+    var PAGE_SIZE = 20;
+
+    /* ============================================================
+       STATE
+    ============================================================ */
+    var state = {
+      token: localStorage.getItem(LS_TOKEN) || '',
+      apps: [],
+      filtered: [],
+      page: 1,
+      search: '',
+      filterStatus: '',
+      filterBranch: '',
+      debounceTimer: null,
+      noteTimers: {}
+    };
+
+    /* ============================================================
+       UTILS
+    ============================================================ */
+    function esc(str) {
+      var d = document.createElement('div');
+      d.textContent = String(str == null ? '' : str);
+      return d.innerHTML;
+    }
+
+    function authHeaders() {
+      return { 'Authorization': 'Bearer ' + state.token, 'Content-Type': 'application/json' };
+    }
+
+    function showToast(msg, isErr) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast' + (isErr ? ' err' : '');
+      el.classList.add('show');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(function() { el.classList.remove('show'); }, 2800);
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      if (isNaN(d)) return iso;
+      return (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+        String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
 
     /* ============================================================
        INIT
     ============================================================ */
     (function init() {
-      var authed = localStorage.getItem(LS_AUTH) === '1';
-      if (authed) {
-        showShell();
-        loadContent();
-      }
       fixLogos();
+      bindNav();
+      bindDashboard();
+      bindContent();
+      bindSettings();
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+      document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+      if (state.token) {
+        checkAuth();
+      }
     })();
 
-    /* Fix logos for dark mode */
+    /* Fix logos for dark/light mode */
     function fixLogos() {
       var darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
       function applyLogos(isDark) {
-        var lightImgs = document.querySelectorAll('.logo-light');
-        var darkImgs  = document.querySelectorAll('.logo-dark');
-        lightImgs.forEach(function(el) { el.style.display = isDark ? 'block' : 'none'; });
-        darkImgs.forEach(function(el)  { el.style.display = isDark ? 'none'  : 'block'; });
+        document.querySelectorAll('.logo-light').forEach(function(el) { el.style.display = isDark ? 'block' : 'none'; });
+        document.querySelectorAll('.logo-dark').forEach(function(el)  { el.style.display = isDark ? 'none'  : 'block'; });
       }
       applyLogos(darkMQ.matches);
       darkMQ.addEventListener('change', function(e) { applyLogos(e.matches); });
@@ -705,22 +1148,52 @@
     ============================================================ */
     function handleLogin(e) {
       e.preventDefault();
-      var pw = document.getElementById('login-pw').value;
+      var pw = document.getElementById('login-pw').value.trim();
       var errEl = document.getElementById('login-error');
-      if (pw === ADMIN_PW) {
-        localStorage.setItem(LS_AUTH, '1');
+      errEl.classList.remove('visible');
+
+      fetch(API_BASE + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: pw })
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('auth_fail');
+        return r.json();
+      })
+      .then(function(data) {
+        state.token = data.token || pw;
+        localStorage.setItem(LS_TOKEN, state.token);
         errEl.classList.remove('visible');
+        document.getElementById('login-pw').value = '';
         showShell();
-        loadContent();
-      } else {
+        loadDashboard();
+      })
+      .catch(function() {
         errEl.classList.add('visible');
         document.getElementById('login-pw').value = '';
         document.getElementById('login-pw').focus();
-      }
+      });
+    }
+
+    function checkAuth() {
+      fetch(API_BASE + '/api/auth/check', {
+        headers: { 'Authorization': 'Bearer ' + state.token }
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('invalid');
+        showShell();
+        loadDashboard();
+      })
+      .catch(function() {
+        state.token = '';
+        localStorage.removeItem(LS_TOKEN);
+      });
     }
 
     function handleLogout() {
-      localStorage.removeItem(LS_AUTH);
+      state.token = '';
+      localStorage.removeItem(LS_TOKEN);
       document.getElementById('admin-shell').classList.remove('visible');
       document.getElementById('login-screen').style.display = 'flex';
       document.getElementById('login-pw').value = '';
@@ -732,80 +1205,415 @@
     }
 
     /* ============================================================
-       SECTION SWITCHING
+       NAVIGATION
     ============================================================ */
-    function switchSection(targetId, btn) {
-      /* Hide all sections */
-      document.querySelectorAll('.admin-section').forEach(function(s) {
-        s.classList.remove('active');
+    function bindNav() {
+      document.querySelectorAll('[data-target]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          switchSection(btn.getAttribute('data-target'));
+        });
       });
-      /* Deactivate all nav buttons + tabs */
-      document.querySelectorAll('.sidebar-nav-btn, .admin-tab-btn').forEach(function(b) {
-        b.classList.remove('active');
-      });
-      /* Show target */
-      document.getElementById(targetId).classList.add('active');
-      /* Activate matching buttons in both sidebar and tabs */
-      document.querySelectorAll('[data-target="' + targetId + '"]').forEach(function(b) {
-        b.classList.add('active');
-      });
+    }
 
-      /* Show/hide save bar */
+    function switchSection(targetId) {
+      document.querySelectorAll('.admin-section').forEach(function(s) { s.classList.remove('active'); });
+      document.querySelectorAll('.sidebar-nav-btn, .admin-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById(targetId).classList.add('active');
+      document.querySelectorAll('[data-target="' + targetId + '"]').forEach(function(b) { b.classList.add('active'); });
+
       var saveBar = document.getElementById('save-bar');
-      saveBar.style.display = targetId === 'sec-dashboard' ? 'none' : 'flex';
+      saveBar.style.display = targetId === 'sec-content' ? 'flex' : 'none';
+
+      if (targetId === 'sec-dashboard') loadDashboard();
+      if (targetId === 'sec-capacity') loadCapacity();
+      if (targetId === 'sec-content')  loadSiteContent();
     }
 
     /* ============================================================
-       CONTENT PERSISTENCE
+       DASHBOARD
     ============================================================ */
-    var FIELD_IDS = [
-      'main-hero-title',
-      'main-hero-sub',
-      'main-about-p1',
-      'main-about-p2',
-      'main-price-info',
-      'main-cta-title',
-      'main-cta-sub',
-      'form-title',
-      'form-subtitle',
-      'form-submit-note',
-      'form-refund-title',
-      'form-refund-list',
-      'form-refund-notice',
-      'complete-title',
-      'complete-sub',
-      'complete-notice-title',
-      'complete-notice-body'
-    ];
+    function bindDashboard() {
+      document.getElementById('app-search').addEventListener('input', function() {
+        state.search = this.value;
+        state.page = 1;
+        applyFilters();
+      });
+      document.getElementById('filter-status').addEventListener('change', function() {
+        state.filterStatus = this.value;
+        state.page = 1;
+        applyFilters();
+      });
+      document.getElementById('filter-branch').addEventListener('change', function() {
+        state.filterBranch = this.value;
+        state.page = 1;
+        applyFilters();
+      });
+      document.getElementById('btn-refresh').addEventListener('click', loadDashboard);
+      document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
+      document.getElementById('btn-backup').addEventListener('click', downloadBackup);
+    }
 
-    function loadContent() {
-      try {
-        var saved = JSON.parse(localStorage.getItem(LS_CONTENT) || '{}');
-        FIELD_IDS.forEach(function(id) {
-          if (saved[id] !== undefined) {
-            var el = document.getElementById(id);
-            if (el) el.value = saved[id];
+    function loadDashboard() {
+      fetch(API_BASE + '/api/applications', { headers: { 'Authorization': 'Bearer ' + state.token } })
+      .then(function(r) {
+        if (r.status === 401) { handleLogout(); throw new Error('unauth'); }
+        if (!r.ok) throw new Error('fetch_fail');
+        return r.json();
+      })
+      .then(function(data) {
+        var apps = data.applications || [];
+        var stats = data.stats || {};
+        state.apps = apps;
+
+        // Stats
+        document.getElementById('stat-total').textContent  = stats.totalCount != null ? stats.totalCount : apps.length;
+        document.getElementById('stat-today').textContent  = stats.todayCount != null ? stats.todayCount : '—';
+        document.getElementById('stat-coupon').textContent = stats.couponCount != null ? stats.couponCount : '—';
+
+        // Days breakdown
+        var dayCounts = { '금요일': 0, '토요일': 0, '일요일': 0 };
+        apps.forEach(function(a) {
+          if (a.partyDate) {
+            var day = String(a.partyDate);
+            Object.keys(dayCounts).forEach(function(k) { if (day.indexOf(k.charAt(0)) !== -1 || day.indexOf(k) !== -1) dayCounts[k]++; });
           }
         });
-      } catch (e) {
-        /* ignore parse errors */
+        document.getElementById('stat-days').textContent = '';
+        document.getElementById('stat-days-sub').textContent =
+          '금 ' + (dayCounts['금요일'] || 0) + ' / 토 ' + (dayCounts['토요일'] || 0) + ' / 일 ' + (dayCounts['일요일'] || 0);
+
+        state.page = 1;
+        applyFilters();
+      })
+      .catch(function(err) {
+        if (err.message !== 'unauth') {
+          document.getElementById('app-tbody').innerHTML = '<tr class="loading-row"><td colspan="9">데이터를 불러오지 못했습니다.</td></tr>';
+        }
+      });
+    }
+
+    function applyFilters() {
+      var q = state.search.toLowerCase();
+      state.filtered = state.apps.filter(function(a) {
+        if (q && (String(a.name || '').toLowerCase().indexOf(q) === -1) &&
+                 (String(a.phone || '').toLowerCase().indexOf(q) === -1)) return false;
+        if (state.filterStatus && a.status !== state.filterStatus) return false;
+        if (state.filterBranch && String(a.branch || '').indexOf(state.filterBranch) === -1) return false;
+        return true;
+      });
+      renderTable();
+      renderPagination();
+    }
+
+    function renderTable() {
+      var tbody = document.getElementById('app-tbody');
+      var start = (state.page - 1) * PAGE_SIZE;
+      var slice = state.filtered.slice(start, start + PAGE_SIZE);
+
+      if (slice.length === 0) {
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="9">신청 내역이 없습니다.</td></tr>';
+        return;
       }
+
+      var html = '';
+      slice.forEach(function(a) {
+        var statusOpts = ['입금대기', '입금완료', '보류', '취소', '환불'];
+        var statusHtml = '<select class="status-select" data-status="' + esc(a.status) + '" data-id="' + esc(a.id) + '">';
+        statusOpts.forEach(function(s) {
+          statusHtml += '<option value="' + esc(s) + '"' + (a.status === s ? ' selected' : '') + '>' + esc(s) + '</option>';
+        });
+        statusHtml += '</select>';
+
+        html += '<tr>' +
+          '<td>' + esc(formatDate(a.createdAt)) + '</td>' +
+          '<td class="cell-name">' + esc(a.name) + (a.age ? ' <span style="color:var(--muted);font-weight:400;">(' + esc(a.age) + ')</span>' : '') + '</td>' +
+          '<td class="cell-phone">' + esc(a.phone) + '</td>' +
+          '<td>' + esc(a.branch || '') + (a.priceText ? ' / ' + esc(a.priceText) : '') + '</td>' +
+          '<td>' + esc(a.partyDate || '—') + '</td>' +
+          '<td class="cell-coupon">' + esc(a.coupon || '') + '</td>' +
+          '<td>' + statusHtml + '</td>' +
+          '<td><input class="note-input" type="text" value="' + esc(a.adminNote || '') + '" data-id="' + esc(a.id) + '" placeholder="메모…" /></td>' +
+          '<td class="cell-id">' + esc(a.id) + '</td>' +
+        '</tr>';
+      });
+      tbody.innerHTML = html;
+
+      // Bind status selects
+      tbody.querySelectorAll('.status-select').forEach(function(sel) {
+        sel.addEventListener('change', function() {
+          var id = this.getAttribute('data-id');
+          var newStatus = this.value;
+          this.setAttribute('data-status', newStatus);
+          patchApplication(id, { status: newStatus });
+        });
+      });
+
+      // Bind note inputs (debounced)
+      tbody.querySelectorAll('.note-input').forEach(function(inp) {
+        inp.addEventListener('input', function() {
+          var id = this.getAttribute('data-id');
+          var val = this.value;
+          clearTimeout(state.noteTimers[id]);
+          state.noteTimers[id] = setTimeout(function() {
+            patchApplication(id, { admin_note: val });
+          }, 800);
+        });
+      });
+    }
+
+    function renderPagination() {
+      var pg = document.getElementById('pagination');
+      var total = state.filtered.length;
+      var pages = Math.ceil(total / PAGE_SIZE);
+      if (pages <= 1) { pg.innerHTML = ''; return; }
+
+      var html = '<button class="page-btn" id="pg-prev" ' + (state.page <= 1 ? 'disabled' : '') + '>이전</button>';
+      var start = Math.max(1, state.page - 2);
+      var end   = Math.min(pages, state.page + 2);
+      for (var i = start; i <= end; i++) {
+        html += '<button class="page-btn' + (i === state.page ? ' active' : '') + '" data-page="' + i + '">' + i + '</button>';
+      }
+      html += '<span class="page-info">' + state.page + ' / ' + pages + '</span>';
+      html += '<button class="page-btn" id="pg-next" ' + (state.page >= pages ? 'disabled' : '') + '>다음</button>';
+      pg.innerHTML = html;
+
+      pg.querySelector('#pg-prev').addEventListener('click', function() {
+        if (state.page > 1) { state.page--; renderTable(); renderPagination(); }
+      });
+      pg.querySelector('#pg-next').addEventListener('click', function() {
+        if (state.page < pages) { state.page++; renderTable(); renderPagination(); }
+      });
+      pg.querySelectorAll('[data-page]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          state.page = parseInt(this.getAttribute('data-page'), 10);
+          renderTable();
+          renderPagination();
+        });
+      });
+    }
+
+    function patchApplication(id, body) {
+      fetch(API_BASE + '/api/applications/' + encodeURIComponent(id), {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify(body)
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('patch_fail');
+        showToast('저장되었습니다.');
+        // Sync local state
+        state.apps.forEach(function(a) {
+          if (a.id === id) {
+            if (body.status !== undefined) a.status = body.status;
+            if (body.admin_note !== undefined) a.adminNote = body.admin_note;
+          }
+        });
+      })
+      .catch(function() {
+        showToast('저장 실패', true);
+      });
+    }
+
+    function exportCsv() {
+      var url = API_BASE + '/api/applications/export/csv';
+      var a = document.createElement('a');
+      a.href = url;
+      a.setAttribute('download', '');
+      // Pass token via query param as fallback since download link can't set headers
+      a.href = url + '?token=' + encodeURIComponent(state.token);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function downloadBackup() {
+      var url = API_BASE + '/api/backup?token=' + encodeURIComponent(state.token);
+      var a = document.createElement('a');
+      a.href = url;
+      a.setAttribute('download', '');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    /* ============================================================
+       CAPACITY
+    ============================================================ */
+    function loadCapacity() {
+      fetch(API_BASE + '/api/capacity', { headers: { 'Authorization': 'Bearer ' + state.token } })
+      .then(function(r) {
+        if (!r.ok) throw new Error('cap_fail');
+        return r.json();
+      })
+      .then(function(data) {
+        renderCapacity(data);
+      })
+      .catch(function() {
+        // Fallback: try public scarcity endpoint
+        fetch(API_BASE + '/api/scarcity')
+        .then(function(r) { return r.json(); })
+        .then(function(data) { renderCapacity(data); })
+        .catch(function() {
+          document.getElementById('capacity-grid').innerHTML =
+            '<div class="content-group" style="text-align:center;color:var(--muted);">데이터를 불러오지 못했습니다.</div>';
+        });
+      });
+    }
+
+    function renderCapacity(data) {
+      var grid = document.getElementById('capacity-grid');
+      var dates = data.dates || data;
+      var days = ['금요일', '토요일', '일요일'];
+      var html = '';
+
+      days.forEach(function(day) {
+        var info = dates[day] || {};
+        var capacity = info.capacity != null ? info.capacity : 0;
+        var count    = info.count    != null ? info.count    : 0;
+        var pct = capacity > 0 ? Math.min(100, Math.round(count / capacity * 100)) : 0;
+        var level = pct < 50 ? 'low' : pct < 80 ? 'mid' : 'high';
+
+        html += '<div class="capacity-card">' +
+          '<div class="capacity-card-day">' + esc(day) + '</div>' +
+          '<div class="capacity-stat">' + count + ' / ' + capacity + '명 (' + pct + '%)</div>' +
+          '<div class="capacity-bar-wrap"><div class="capacity-bar level-' + level + '" style="width:' + pct + '%"></div></div>' +
+          '<div class="capacity-input-row">' +
+            '<input class="capacity-input" type="number" min="0" value="' + esc(capacity) + '" data-day="' + esc(day) + '" placeholder="정원" />' +
+            '<button class="capacity-save-btn" data-day="' + esc(day) + '" type="button">저장</button>' +
+          '</div>' +
+        '</div>';
+      });
+
+      grid.innerHTML = html;
+
+      grid.querySelectorAll('.capacity-save-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var day = this.getAttribute('data-day');
+          var inp = grid.querySelector('.capacity-input[data-day="' + day + '"]');
+          var cap = parseInt(inp.value, 10);
+          if (isNaN(cap) || cap < 0) { showToast('올바른 숫자를 입력하세요.', true); return; }
+          saveCapacity(day, cap);
+        });
+      });
+    }
+
+    function saveCapacity(day, capacity) {
+      fetch(API_BASE + '/api/capacity', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ day: day, capacity: capacity })
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('save_fail');
+        showToast(day + ' 정원이 ' + capacity + '명으로 저장되었습니다.');
+        loadCapacity();
+      })
+      .catch(function() {
+        showToast('저장 실패', true);
+      });
+    }
+
+    /* ============================================================
+       CONTENT MANAGEMENT
+    ============================================================ */
+    var CONTENT_FIELD_IDS = [
+      'main-hero-title', 'main-hero-sub',
+      'main-about-p1', 'main-about-p2',
+      'main-price-info',
+      'main-cta-title', 'main-cta-sub',
+      'form-title', 'form-subtitle', 'form-submit-note',
+      'form-refund-title', 'form-refund-list', 'form-refund-notice',
+      'complete-title', 'complete-sub',
+      'complete-notice-title', 'complete-notice-body'
+    ];
+
+    function bindContent() {
+      document.getElementById('save-content-btn').addEventListener('click', saveContent);
+    }
+
+    function loadSiteContent() {
+      fetch(API_BASE + '/api/site-content', { headers: { 'Authorization': 'Bearer ' + state.token } })
+      .then(function(r) {
+        if (!r.ok) throw new Error('content_fail');
+        return r.json();
+      })
+      .then(function(data) {
+        var content = data.content || data;
+        CONTENT_FIELD_IDS.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el && content[id] !== undefined) el.value = content[id];
+        });
+      })
+      .catch(function() {
+        showToast('콘텐츠를 불러오지 못했습니다.', true);
+      });
     }
 
     function saveContent() {
-      var data = {};
-      FIELD_IDS.forEach(function(id) {
+      var content = {};
+      CONTENT_FIELD_IDS.forEach(function(id) {
         var el = document.getElementById(id);
-        if (el) data[id] = el.value;
+        if (el) content[id] = el.value;
       });
-      localStorage.setItem(LS_CONTENT, JSON.stringify(data));
 
-      /* Show success feedback */
-      var msg = document.getElementById('save-success-msg');
-      msg.classList.add('visible');
-      setTimeout(function() {
-        msg.classList.remove('visible');
-      }, 2500);
+      fetch(API_BASE + '/api/site-content', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ content: content })
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('save_fail');
+        var msg = document.getElementById('save-success-msg');
+        msg.classList.add('visible');
+        setTimeout(function() { msg.classList.remove('visible'); }, 2500);
+        showToast('콘텐츠가 저장되었습니다.');
+      })
+      .catch(function() {
+        showToast('저장 실패', true);
+      });
+    }
+
+    /* ============================================================
+       SETTINGS
+    ============================================================ */
+    function bindSettings() {
+      document.getElementById('pw-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var cur  = document.getElementById('pw-current').value;
+        var nw   = document.getElementById('pw-new').value;
+        var conf = document.getElementById('pw-confirm').value;
+        var msg  = document.getElementById('pw-msg');
+
+        msg.className = 'settings-msg';
+
+        if (!cur || !nw || !conf) {
+          msg.textContent = '모든 항목을 입력해 주세요.';
+          msg.className = 'settings-msg err';
+          return;
+        }
+        if (nw !== conf) {
+          msg.textContent = '새 비밀번호가 일치하지 않습니다.';
+          msg.className = 'settings-msg err';
+          return;
+        }
+
+        fetch(API_BASE + '/api/admin/password', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ currentPassword: cur, newPassword: nw })
+        })
+        .then(function(r) {
+          if (!r.ok) throw new Error('pw_fail');
+          msg.textContent = '비밀번호가 변경되었습니다. 다시 로그인해 주세요.';
+          msg.className = 'settings-msg ok';
+          document.getElementById('pw-form').reset();
+          setTimeout(handleLogout, 2000);
+        })
+        .catch(function() {
+          msg.textContent = '현재 비밀번호가 올바르지 않거나 변경에 실패했습니다.';
+          msg.className = 'settings-msg err';
+        });
+      });
     }
   </script>
 </body>
