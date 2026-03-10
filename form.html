@@ -49,15 +49,15 @@
         <span class="field-error" id="err-name">이름을 입력해 주세요.</span>
       </div>
 
-      <!-- 출생연도 + 연락처 -->
+      <!-- 나이 + 연락처 -->
       <div class="text-input-row">
         <div class="field-group" style="flex:1">
-          <label class="field-label" for="field-birthyear">
-            출생연도 <span class="field-required">*</span>
+          <label class="field-label" for="field-age">
+            나이 <span class="field-required">*</span>
           </label>
-          <input class="text-input" type="number" id="field-birthyear" name="birthyear"
-            placeholder="1997" min="1986" max="2005" required inputmode="numeric" />
-          <span class="field-error" id="err-birthyear">1986~2005년생만 신청 가능합니다.</span>
+          <input class="text-input" type="number" id="field-age" name="age"
+            placeholder="" min="20" max="39" required inputmode="numeric" />
+          <span class="field-error" id="err-age">20~39세만 신청 가능합니다.</span>
         </div>
         <div class="field-group" style="flex:2">
           <label class="field-label" for="field-phone">
@@ -138,19 +138,19 @@
             <input class="radio-card-input" type="radio" name="date" value="금요일" />
             <span class="radio-card-name">금</span>
             <span class="radio-card-sub">Friday</span>
-            <span class="radio-card-badge scarcity">잔여 소수</span>
+            <span class="radio-card-badge scarcity" id="scarcity-금요일"></span>
           </label>
           <label class="radio-card-label">
             <input class="radio-card-input" type="radio" name="date" value="토요일" />
             <span class="radio-card-name">토</span>
             <span class="radio-card-sub">Saturday</span>
-            <span class="radio-card-badge scarcity">잔여 소수</span>
+            <span class="radio-card-badge scarcity" id="scarcity-토요일"></span>
           </label>
           <label class="radio-card-label">
             <input class="radio-card-input" type="radio" name="date" value="일요일" />
             <span class="radio-card-name">일</span>
             <span class="radio-card-sub">Sunday</span>
-            <span class="radio-card-badge scarcity">잔여 소수</span>
+            <span class="radio-card-badge scarcity" id="scarcity-일요일"></span>
           </label>
         </div>
         <span class="field-error" id="err-date">날짜를 선택해 주세요.</span>

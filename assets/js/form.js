@@ -1,4 +1,39 @@
 /* =============================================
+   SCARCITY BADGES (dynamic from API)
+   ============================================= */
+(async function loadScarcity() {
+  try {
+    const res = await fetch('/api/scarcity');
+    if (!res.ok) return;
+    const data = await res.json();
+    const dates = data.dates || {};
+    Object.entries(dates).forEach(([day, info]) => {
+      const badge = document.getElementById('scarcity-' + day);
+      if (!badge) return;
+      const label = badge.closest('.radio-card-label');
+      if (info.level === '마감') {
+        badge.textContent = '마감';
+        badge.className = 'radio-card-badge closed';
+        if (label) {
+          label.classList.add('disabled');
+          const input = label.querySelector('input');
+          if (input) input.disabled = true;
+        }
+      } else if (info.level === '마감임박') {
+        badge.textContent = '마감임박';
+        badge.className = 'radio-card-badge scarcity urgent';
+      } else if (info.level === '잔여 소수') {
+        badge.textContent = '잔여 소수';
+        badge.className = 'radio-card-badge scarcity';
+      } else {
+        badge.textContent = '여유';
+        badge.className = 'radio-card-badge available';
+      }
+    });
+  } catch { /* no backend — badges stay empty */ }
+})();
+
+/* =============================================
    PRICE DATA
    ============================================= */
 const PRICES = {
@@ -191,7 +226,7 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
   let valid = true;
 
   const name = document.getElementById('field-name').value.trim();
-  const birthyear = parseInt(document.getElementById('field-birthyear').value);
+  const age = parseInt(document.getElementById('field-age').value);
   const phone = document.getElementById('field-phone').value.trim();
   const gender = document.querySelector('input[name="gender"]:checked')?.value;
   const branch = document.querySelector('input[name="branch"]:checked')?.value;
@@ -203,8 +238,8 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
   showError('err-name', !name);
   if (!name) valid = false;
 
-  showError('err-age', !birthyear || birthyear < 1986 || birthyear > 2005);
-  if (!birthyear || birthyear < 1986 || birthyear > 2005) valid = false;
+  showError('err-age', !age || age < 20 || age > 39);
+  if (!age || age < 20 || age > 39) valid = false;
 
   showError('err-phone', !phone || phone.replace(/\D/g, '').length < 10);
   if (!phone || phone.replace(/\D/g, '').length < 10) valid = false;
@@ -245,8 +280,7 @@ document.getElementById('party-form').addEventListener('submit', async (e) => {
 
   const formData = {
     name,
-    birthyear,
-    age: new Date().getFullYear() - parseInt(birthyear),
+    age,
     phone,
     gender,
     branch,

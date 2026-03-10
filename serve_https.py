@@ -114,6 +114,64 @@ class ApplicationStore:
                 )
                 """
             )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS capacity_settings (
+                    day_key TEXT PRIMARY KEY,
+                    capacity INTEGER NOT NULL DEFAULT 30,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+
+    def get_capacity_settings(self) -> dict:
+        with self._connect() as conn:
+            rows = conn.execute("SELECT day_key, capacity FROM capacity_settings").fetchall()
+        settings = {r[0]: r[1] for r in rows}
+        # defaults
+        for day in ("금요일", "토요일", "일요일"):
+            if day not in settings:
+                settings[day] = 30
+        return settings
+
+    def set_capacity(self, day_key: str, capacity: int) -> dict:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO capacity_settings (day_key, capacity, updated_at)
+                VALUES (?, ?, CURRENT_TIMESTAMP)
+                ON CONFLICT(day_key) DO UPDATE SET capacity=excluded.capacity, updated_at=excluded.updated_at
+                """,
+                (day_key, capacity),
+            )
+        return self.get_capacity_settings()
+
+    def get_date_counts(self) -> dict:
+        """Count applications per date (excluding cancelled/refunded)."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT party_date, COUNT(*) FROM applications WHERE status NOT IN ('취소','환불') GROUP BY party_date"
+            ).fetchall()
+        return {r[0]: r[1] for r in rows}
+
+    def get_scarcity_info(self) -> dict:
+        caps = self.get_capacity_settings()
+        counts = self.get_date_counts()
+        result = {}
+        for day in ("금요일", "토요일", "일요일"):
+            cap = caps.get(day, 30)
+            count = counts.get(day, 0)
+            ratio = count / cap if cap > 0 else 0
+            if ratio >= 1:
+                level = "마감"
+            elif ratio >= 0.8:
+                level = "마감임박"
+            elif ratio >= 0.5:
+                level = "잔여 소수"
+            else:
+                level = "여유"
+            result[day] = {"capacity": cap, "count": count, "level": level}
+        return result
 
     def create_application(self, payload: dict) -> dict:
         normalized = self._normalize_payload(payload)
@@ -430,6 +488,15 @@ class ApplicationStore:
                     )
                     """
                 )
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS capacity_settings (
+                        day_key TEXT PRIMARY KEY,
+                        capacity INTEGER NOT NULL DEFAULT 30,
+                        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    )
+                    """
+                )
 
     def _insert_postgres(self, normalized: dict) -> int:
         row = self._query_one_postgres(
@@ -584,6 +651,16 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._write_json(200, {"content": STORE.get_site_content()})
             return
 
+        if parsed.path == "/api/scarcity":
+            self._write_json(200, {"dates": STORE.get_scarcity_info()})
+            return
+
+        if parsed.path == "/api/capacity":
+            if not self._require_admin():
+                return
+            self._write_json(200, {"capacity": STORE.get_capacity_settings()})
+            return
+
         if parsed.path == "/api/applications":
             if not self._require_admin():
                 return
@@ -664,6 +741,22 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
             set_admin_token(new_pw)
             self._write_json(200, {"ok": True})
+            return
+
+        if parsed.path == "/api/capacity":
+            if not self._require_admin():
+                return
+            try:
+                payload = self._read_payload()
+                day = payload.get("day")
+                cap = int(payload.get("capacity", 30))
+                if day not in ("금요일", "토요일", "일요일"):
+                    self._write_json(400, {"error": "Invalid day"})
+                    return
+                result = STORE.set_capacity(day, cap)
+                self._write_json(200, {"capacity": result})
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
             return
 
         if parsed.path == "/api/site-content":
