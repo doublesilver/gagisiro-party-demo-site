@@ -23,9 +23,12 @@ function fmtGender(g) { return g === 'male' ? '남성' : g === 'female' ? '여�
       const raw = (apiData.content || {}).pricing;
       if (raw) {
         const pricing = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        ['건대', '영등포'].forEach(branch => {
-          if (pricing[branch]) PRICES[branch] = { male: Number(pricing[branch].male), female: Number(pricing[branch].female) };
+        const newPrices = {};
+        Object.keys(pricing).forEach(key => {
+          if (key === 'part2_base' || key === 'part2_discount') return;
+          newPrices[key] = { male: Number(pricing[key].male), female: Number(pricing[key].female) };
         });
+        if (Object.keys(newPrices).length > 0) PRICES = newPrices;
         if (pricing.part2_base) PART2_BASE = Number(pricing.part2_base);
         if (pricing.part2_discount) PART2_DISCOUNT = Number(pricing.part2_discount);
       }

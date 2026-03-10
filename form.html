@@ -95,17 +95,8 @@
       <!-- 지점 -->
       <div class="field-group">
         <span class="field-label">지점 <span class="field-required">*</span></span>
-        <div class="radio-grid radio-grid-4" role="radiogroup" aria-required="true">
-          <label class="radio-card-label">
-            <input class="radio-card-input" type="radio" name="branch" value="건대" />
-            <span class="radio-card-name">🏢 건대</span>
-            <span class="radio-card-sub" id="branch-price-건대">남 33,000 / 여 23,000</span>
-          </label>
-          <label class="radio-card-label">
-            <input class="radio-card-input" type="radio" name="branch" value="영등포" />
-            <span class="radio-card-name">🏢 영등포</span>
-            <span class="radio-card-sub" id="branch-price-영등포">남 39,500 / 여 29,500</span>
-          </label>
+        <div class="radio-grid" id="branch-radio-grid" role="radiogroup" aria-required="true">
+          <!-- 지점 카드가 JS로 동적 생성됩니다 -->
         </div>
         <span class="field-error" id="err-branch">지점을 선택해 주세요.</span>
       </div>

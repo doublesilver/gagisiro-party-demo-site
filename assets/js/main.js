@@ -213,18 +213,33 @@ async function loadSiteContent() {
       if (el) el.innerHTML = val.replace(/\n/g, '<br/>');
     });
 
-    /* Apply dynamic pricing to price cards */
+    /* Build dynamic price cards from pricing data */
     if (content.pricing) {
       try {
         const pricing = typeof content.pricing === 'string' ? JSON.parse(content.pricing) : content.pricing;
         const fmt = n => Number(n).toLocaleString('ko-KR');
-        ['건대', '영등포'].forEach(branch => {
-          if (!pricing[branch]) return;
-          const maleEl = document.getElementById('main-price-' + branch + '-male');
-          const femaleEl = document.getElementById('main-price-' + branch + '-female');
-          if (maleEl) maleEl.textContent = fmt(pricing[branch].male);
-          if (femaleEl) femaleEl.textContent = fmt(pricing[branch].female);
-        });
+        const grid = document.getElementById('main-price-grid');
+        if (grid) {
+          const branches = Object.keys(pricing).filter(k => k !== 'part2_base' && k !== 'part2_discount');
+          if (branches.length > 0) {
+            grid.innerHTML = branches.map(branch => {
+              const p = pricing[branch];
+              const note = p.note || '';
+              return '<div class="price-card">' +
+                '<div class="price-card-accent" aria-hidden="true"></div>' +
+                '<span class="price-card-badge">' + branch + '</span>' +
+                '<p class="price-card-name">' + branch + '점</p>' +
+                '<div class="price-row"><span class="price-label">남</span>' +
+                  '<span class="price-val">' + fmt(p.male) + '</span>' +
+                  '<span style="font-size:var(--fs-xs);color:var(--muted)">원</span></div>' +
+                '<div class="price-row"><span class="price-label">여</span>' +
+                  '<span class="price-val price-val-accent">' + fmt(p.female) + '</span>' +
+                  '<span style="font-size:var(--fs-xs);color:var(--muted)">원</span></div>' +
+                (note ? '<p class="price-note">' + note + '</p>' : '') +
+              '</div>';
+            }).join('');
+          }
+        }
       } catch { /* invalid pricing JSON */ }
     }
   } catch { /* no backend */ }

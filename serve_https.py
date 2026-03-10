@@ -583,8 +583,8 @@ class ApplicationStore:
 
         # Load pricing from admin settings, fallback to defaults
         DEFAULT_PRICES = {
-            "건대": {"male": 33000, "female": 23000},
-            "영등포": {"male": 39500, "female": 29500},
+            "건대": {"male": 33000, "female": 23000, "note": "포틀럭 포함"},
+            "영등포": {"male": 39500, "female": 29500, "note": "안주 포함"},
         }
         stored_pricing = STORE.get_site_content_value("pricing")
         if stored_pricing:
@@ -938,8 +938,8 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
             pricing = STORE.get_site_content_value("pricing")
             import json as _json
             pricing_data = _json.loads(pricing) if pricing else {
-                "건대": {"male": 33000, "female": 23000},
-                "영등포": {"male": 39500, "female": 29500},
+                "건대": {"male": 33000, "female": 23000, "note": "포틀럭 포함"},
+                "영등포": {"male": 39500, "female": 29500, "note": "안주 포함"},
                 "part2_base": 18000,
                 "part2_discount": 10,
             }

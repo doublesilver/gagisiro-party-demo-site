@@ -121,11 +121,31 @@ _apiDone.finally(revealPage);
    PRICE DATA (loaded from API, fallback to defaults)
    ============================================= */
 let PRICES = {
-  '건대': { male: 33000, female: 23000 },
-  '영등포': { male: 39500, female: 29500 },
+  '건대': { male: 33000, female: 23000, note: '포틀럭 포함' },
+  '영등포': { male: 39500, female: 29500, note: '안주 포함' },
 };
 let PART2_BASE = 18000;
 let PART2_DISCOUNT = 10;
+
+function getBranchNames() {
+  return Object.keys(PRICES);
+}
+
+function renderBranchCards() {
+  const grid = document.getElementById('branch-radio-grid');
+  if (!grid) return;
+  const count = getBranchNames().length;
+  grid.className = 'radio-grid radio-grid-' + Math.min(count, 4);
+  grid.innerHTML = getBranchNames().map(branch => {
+    const p = PRICES[branch];
+    return '<label class="radio-card-label">' +
+      '<input class="radio-card-input" type="radio" name="branch" value="' + branch + '" />' +
+      '<span class="radio-card-name">\uD83C\uDFE2 ' + branch + '</span>' +
+      '<span class="radio-card-sub" id="branch-price-' + branch + '">남 ' + fmtPrice(p.male) + ' / 여 ' + fmtPrice(p.female) + '</span>' +
+    '</label>';
+  }).join('');
+  initRadioCards('branch');
+}
 
 (async function loadPricing() {
   try {
@@ -135,13 +155,17 @@ let PART2_DISCOUNT = 10;
     const raw = (data.content || {}).pricing;
     if (!raw) return;
     const pricing = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    ['건대', '영등포'].forEach(branch => {
-      if (pricing[branch]) {
-        PRICES[branch] = { male: Number(pricing[branch].male), female: Number(pricing[branch].female) };
-      }
+    /* Build PRICES from all branch keys */
+    const newPrices = {};
+    Object.keys(pricing).forEach(key => {
+      if (key === 'part2_base' || key === 'part2_discount') return;
+      newPrices[key] = { male: Number(pricing[key].male), female: Number(pricing[key].female), note: pricing[key].note || '' };
     });
+    if (Object.keys(newPrices).length > 0) PRICES = newPrices;
     if (pricing.part2_base) PART2_BASE = Number(pricing.part2_base);
     if (pricing.part2_discount) PART2_DISCOUNT = Number(pricing.part2_discount);
+    /* Render branch cards */
+    renderBranchCards();
     /* Update 2부 labels */
     const onsiteEl = document.getElementById('part2OnsitePrice');
     if (onsiteEl) onsiteEl.textContent = '현장가 ' + fmtPrice(PART2_BASE);
@@ -153,6 +177,9 @@ let PART2_DISCOUNT = 10;
     updatePrice();
   } catch { /* use defaults */ }
 })();
+
+/* Render default branch cards immediately */
+renderBranchCards();
 
 function fmtPrice(n) {
   return n.toLocaleString('ko-KR') + '원';
