@@ -461,11 +461,24 @@ class ApplicationStore:
         if age < 1 or age > 99:
             raise ValidationError("나이는 1세 이상 99세 이하로 입력해 주세요.")
 
-        branch, price_text, location_note, price_amount = self._parse_location(
-            payload.get("location")
-        )
-        party_date = self._require_text(payload.get("partyDate"), "참여 날짜", 80)
-        coupon = str(payload.get("coupon", "")).strip() or None
+        # form.js sends: branch, gender, date, discount, price
+        branch = self._require_text(payload.get("branch"), "지점", 40)
+        gender = self._require_text(payload.get("gender"), "성별", 10)
+
+        PRICES = {
+            "건대": {"male": 35000, "female": 25000},
+            "영등포": {"male": 38000, "female": 28000},
+        }
+        branch_prices = PRICES.get(branch)
+        if not branch_prices:
+            raise ValidationError("지점 정보를 다시 선택해 주세요.")
+        price_amount = branch_prices.get(gender, 0)
+        gender_label = "남" if gender == "male" else "여"
+        price_text = f"{gender_label} {price_amount:,}원"
+        location_note = branch
+
+        party_date = self._require_text(payload.get("date") or payload.get("partyDate"), "참여 날짜", 80)
+        coupon = str(payload.get("discount") or payload.get("coupon") or "").strip() or None
         if coupon and len(coupon) > 40:
             raise ValidationError("할인코드는 40자 이내로 입력해 주세요.")
 
