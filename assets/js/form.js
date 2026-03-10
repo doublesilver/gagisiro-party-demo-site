@@ -2,6 +2,8 @@
    REVEAL HELPER — show page after all API loads
    ============================================= */
 function revealPage() {
+  if (revealPage._done) return;
+  revealPage._done = true;
   document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
 }
 
@@ -85,7 +87,11 @@ async function loadAccountInfo() {
 }
 
 /* Load all dynamic data, then reveal page */
-Promise.all([loadScarcity(), loadSiteContent(), loadAccountInfo()]).finally(revealPage);
+/* Reveal when all APIs done OR after 800ms max wait */
+var _apiDone = Promise.all([loadScarcity(), loadSiteContent(), loadAccountInfo()]);
+var _timeout = new Promise(function(r) { setTimeout(r, 800); });
+Promise.race([_apiDone, _timeout]).then(revealPage);
+_apiDone.finally(revealPage);
 
 /* =============================================
    PRICE DATA (loaded from API, fallback to defaults)

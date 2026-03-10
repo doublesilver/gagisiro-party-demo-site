@@ -80,6 +80,8 @@ if (track) {
 
 /* --- Reveal helper --- */
 function revealPage() {
+  if (revealPage._done) return;
+  revealPage._done = true;
   document.querySelectorAll('.dynamic-load').forEach(function(el) { el.classList.add('loaded'); });
 }
 
@@ -229,7 +231,11 @@ async function loadSiteContent() {
 }
 
 /* Load all dynamic data in parallel, then reveal page */
-Promise.all([loadScarcityBadge(), loadFaq(), loadSiteContent()]).finally(revealPage);
+/* Reveal when all APIs done OR after 800ms max wait */
+var _apiDone = Promise.all([loadScarcityBadge(), loadFaq(), loadSiteContent()]);
+var _timeout = new Promise(function(r) { setTimeout(r, 800); });
+Promise.race([_apiDone, _timeout]).then(revealPage);
+_apiDone.finally(revealPage);
 
 /* --- Scroll fade-up --- */
 const fadeObserver = new IntersectionObserver((entries) => {
