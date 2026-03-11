@@ -2534,16 +2534,22 @@
         }
         var html = '<table style="width:100%;font-size:var(--fs-sm);border-collapse:collapse;">';
         html += '<thead><tr style="text-align:left;color:var(--muted);border-bottom:1px solid var(--border);">';
-        html += '<th style="padding:8px 6px;">코드</th><th style="padding:8px 6px;">할인</th><th style="padding:8px 6px;">사용</th><th style="padding:8px 6px;">상태</th></tr></thead><tbody>';
+        html += '<th style="padding:8px 6px;">코드</th><th style="padding:8px 6px;">할인</th><th style="padding:8px 6px;">사용</th><th style="padding:8px 6px;">상태</th><th style="padding:8px 6px;text-align:right;">관리</th></tr></thead><tbody>';
         codes.forEach(function(c) {
           var discountText = c.discount_type === 'percent' ? c.discount_value + '%' : c.discount_value.toLocaleString() + '원';
           var usageText = c.used_count + (c.max_uses > 0 ? '/' + c.max_uses : '/∞');
           var statusText = c.is_active ? '<span style="color:#22c55e;">활성</span>' : '<span style="color:var(--muted);">비활성</span>';
-          html += '<tr style="border-bottom:1px solid var(--border);">';
+          var toggleLabel = c.is_active ? '비활성화' : '활성화';
+          html += '<tr style="border-bottom:1px solid var(--border);" data-dc-id="' + c.id + '">';
           html += '<td style="padding:8px 6px;font-weight:600;font-family:monospace;">' + esc(c.code) + '</td>';
           html += '<td style="padding:8px 6px;">' + discountText + '</td>';
           html += '<td style="padding:8px 6px;">' + usageText + '</td>';
           html += '<td style="padding:8px 6px;">' + statusText + '</td>';
+          html += '<td style="padding:8px 6px;text-align:right;white-space:nowrap;">';
+          html += '<button class="save-btn" style="padding:4px 10px;font-size:var(--fs-xs);margin-right:4px;" onclick="editDiscountCode(' + c.id + ')">수정</button>';
+          html += '<button class="save-btn" style="padding:4px 10px;font-size:var(--fs-xs);margin-right:4px;background:var(--muted);" onclick="toggleDiscountCode(' + c.id + ',' + (c.is_active ? 0 : 1) + ')">' + toggleLabel + '</button>';
+          html += '<button class="save-btn" style="padding:4px 10px;font-size:var(--fs-xs);background:#ef4444;" onclick="deleteDiscountCode(' + c.id + ',\'' + esc(c.code) + '\')">삭제</button>';
+          html += '</td>';
           html += '</tr>';
         });
         html += '</tbody></table>';
@@ -2552,6 +2558,85 @@
       .catch(function() {
         document.getElementById('dc-list').innerHTML = '<p style="color:var(--muted);font-size:var(--fs-sm);">할인코드를 불러오지 못했습니다.</p>';
       });
+    }
+
+    function toggleDiscountCode(id, newState) {
+      fetch(API_BASE + '/api/admin/discount-codes/update', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ id: id, is_active: newState })
+      })
+      .then(function(r) {
+        if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || '변경 실패'); });
+        return r.json();
+      })
+      .then(function() {
+        showToast(newState ? '할인코드가 활성화되었습니다.' : '할인코드가 비활성화되었습니다.');
+        loadDiscountCodes();
+      })
+      .catch(function(e) { showToast(e.message, true); });
+    }
+
+    function deleteDiscountCode(id, code) {
+      if (!confirm('할인코드 "' + code + '"을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+      fetch(API_BASE + '/api/admin/discount-codes/delete', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ id: id })
+      })
+      .then(function(r) {
+        if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || '삭제 실패'); });
+        return r.json();
+      })
+      .then(function() {
+        showToast('할인코드가 삭제되었습니다.');
+        loadDiscountCodes();
+      })
+      .catch(function(e) { showToast(e.message, true); });
+    }
+
+    function editDiscountCode(id) {
+      var row = document.querySelector('tr[data-dc-id="' + id + '"]');
+      if (!row) return;
+      var cells = row.querySelectorAll('td');
+      var code = cells[0].textContent;
+      var currentDiscount = cells[1].textContent;
+      var currentUsage = cells[2].textContent;
+
+      var newType = prompt('할인 종류 (fixed 또는 percent):', currentDiscount.includes('%') ? 'percent' : 'fixed');
+      if (newType === null) return;
+      if (newType !== 'fixed' && newType !== 'percent') {
+        showToast('할인 종류는 fixed 또는 percent만 가능합니다.', true);
+        return;
+      }
+
+      var newValue = prompt('할인값' + (newType === 'percent' ? ' (%)' : ' (원)') + ':', parseInt(currentDiscount));
+      if (newValue === null) return;
+      newValue = parseInt(newValue);
+      if (isNaN(newValue) || newValue <= 0) {
+        showToast('유효한 할인값을 입력해 주세요.', true);
+        return;
+      }
+
+      var currentMax = currentUsage.split('/')[1];
+      var newMax = prompt('최대 사용 횟수 (0=무제한):', currentMax === '∞' ? '0' : currentMax);
+      if (newMax === null) return;
+      newMax = parseInt(newMax) || 0;
+
+      fetch(API_BASE + '/api/admin/discount-codes/update', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ id: id, discount_type: newType, discount_value: newValue, max_uses: newMax })
+      })
+      .then(function(r) {
+        if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || '수정 실패'); });
+        return r.json();
+      })
+      .then(function() {
+        showToast('할인코드 "' + code + '"이(가) 수정되었습니다.');
+        loadDiscountCodes();
+      })
+      .catch(function(e) { showToast(e.message, true); });
     }
 
     /* ============================================================

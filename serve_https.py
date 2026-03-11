@@ -452,6 +452,37 @@ class ApplicationStore:
             return None
         return data
 
+    def update_discount_code(self, code_id: int, updates: dict) -> dict | None:
+        """Update a discount code's fields (discount_type, discount_value, max_uses, is_active)."""
+        allowed = {"discount_type", "discount_value", "max_uses", "is_active"}
+        filtered = {k: v for k, v in updates.items() if k in allowed}
+        if not filtered:
+            return None
+        if self.kind == "postgres":  # pragma: no cover
+            set_clause = ", ".join(f"{k} = %s" for k in filtered)
+            values = list(filtered.values()) + [code_id]
+            row = self._query_one_postgres(
+                f"UPDATE discount_codes SET {set_clause} WHERE id = %s RETURNING *",
+                tuple(values),
+            )
+            return self._serialize_discount(row) if row else None
+        else:
+            set_clause = ", ".join(f"{k} = ?" for k in filtered)
+            values = list(filtered.values()) + [code_id]
+            with self._sqlite_connection() as conn:
+                conn.execute(f"UPDATE discount_codes SET {set_clause} WHERE id = ?", values)
+                row = conn.execute("SELECT * FROM discount_codes WHERE id = ?", (code_id,)).fetchone()
+            return self._serialize_discount(row) if row else None
+
+    def delete_discount_code(self, code_id: int) -> bool:
+        if self.kind == "postgres":  # pragma: no cover
+            self._query_one_postgres("DELETE FROM discount_codes WHERE id = %s", (code_id,))
+            return True
+        else:
+            with self._sqlite_connection() as conn:
+                cur = conn.execute("DELETE FROM discount_codes WHERE id = ?", (code_id,))
+                return cur.rowcount > 0
+
     def increment_discount_usage(self, code: str) -> None:
         if self.kind == "postgres":  # pragma: no cover
             self._query_one_postgres(
@@ -1247,6 +1278,59 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 result = STORE.create_discount_code(code, discount_type, discount_value, max_uses)
                 self._write_json(201, {"discount_code": result})
+            except (json.JSONDecodeError, ValueError):
+                self._write_json(400, {"error": "요청 본문 형식이 올바르지 않습니다."})
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
+        if parsed.path == "/api/admin/discount-codes/update":
+            if not self._require_admin():
+                return
+            try:
+                payload = self._read_payload()
+                code_id = int(payload.get("id", 0))
+                if not code_id:
+                    self._write_json(400, {"error": "id 필드가 필요합니다."})
+                    return
+                updates = {}
+                if "discount_type" in payload:
+                    dt = str(payload["discount_type"]).strip()
+                    if dt not in ("fixed", "percent"):
+                        self._write_json(400, {"error": "discount_type은 'fixed' 또는 'percent'이어야 합니다."})
+                        return
+                    updates["discount_type"] = dt
+                if "discount_value" in payload:
+                    updates["discount_value"] = int(payload["discount_value"])
+                if "max_uses" in payload:
+                    updates["max_uses"] = int(payload["max_uses"])
+                if "is_active" in payload:
+                    updates["is_active"] = int(payload["is_active"])
+                result = STORE.update_discount_code(code_id, updates)
+                if not result:
+                    self._write_json(404, {"error": "할인코드를 찾을 수 없습니다."})
+                    return
+                self._write_json(200, {"discount_code": result})
+            except (json.JSONDecodeError, ValueError):
+                self._write_json(400, {"error": "요청 본문 형식이 올바르지 않습니다."})
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
+        if parsed.path == "/api/admin/discount-codes/delete":
+            if not self._require_admin():
+                return
+            try:
+                payload = self._read_payload()
+                code_id = int(payload.get("id", 0))
+                if not code_id:
+                    self._write_json(400, {"error": "id 필드가 필요합니다."})
+                    return
+                deleted = STORE.delete_discount_code(code_id)
+                if not deleted:
+                    self._write_json(404, {"error": "할인코드를 찾을 수 없습니다."})
+                    return
+                self._write_json(200, {"ok": True})
             except (json.JSONDecodeError, ValueError):
                 self._write_json(400, {"error": "요청 본문 형식이 올바르지 않습니다."})
             except Exception as exc:

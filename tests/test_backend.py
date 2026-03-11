@@ -2099,3 +2099,122 @@ class TestFaqUpdateDeleteAuthGuard(TestHTTPBase):
                               body={"id": 1},
                               token=None)
         self.assertEqual(status, 401)
+
+
+class TestDiscountCodeUpdateDelete(unittest.TestCase):
+    """Tests for update_discount_code and delete_discount_code store methods."""
+
+    def test_update_discount_value(self):
+        store = _make_store()
+        created = store.create_discount_code("UPD1", "fixed", 5000, 10)
+        updated = store.update_discount_code(created["id"], {"discount_value": 3000})
+        self.assertEqual(updated["discount_value"], 3000)
+
+    def test_update_discount_type(self):
+        store = _make_store()
+        created = store.create_discount_code("UPD2", "fixed", 5000, 0)
+        updated = store.update_discount_code(created["id"], {"discount_type": "percent", "discount_value": 10})
+        self.assertEqual(updated["discount_type"], "percent")
+        self.assertEqual(updated["discount_value"], 10)
+
+    def test_update_is_active(self):
+        store = _make_store()
+        created = store.create_discount_code("UPD3", "fixed", 1000, 0)
+        updated = store.update_discount_code(created["id"], {"is_active": 0})
+        self.assertEqual(updated["is_active"], 0)
+
+    def test_update_empty_updates_returns_none(self):
+        store = _make_store()
+        created = store.create_discount_code("UPD4", "fixed", 1000, 0)
+        result = store.update_discount_code(created["id"], {"bogus_field": 123})
+        self.assertIsNone(result)
+
+    def test_update_nonexistent_returns_none(self):
+        store = _make_store()
+        result = store.update_discount_code(99999, {"discount_value": 100})
+        self.assertIsNone(result)
+
+    def test_delete_discount_code(self):
+        store = _make_store()
+        created = store.create_discount_code("DEL1", "fixed", 1000, 0)
+        self.assertTrue(store.delete_discount_code(created["id"]))
+        codes = store.get_discount_codes()
+        self.assertFalse(any(c["code"] == "DEL1" for c in codes))
+
+    def test_delete_nonexistent_returns_false(self):
+        store = _make_store()
+        self.assertFalse(store.delete_discount_code(99999))
+
+
+class TestDiscountCodeEndpoints(TestHTTPBase):
+    """Tests for /api/admin/discount-codes/update and /delete endpoints."""
+
+    def test_update_endpoint_success(self):
+        status, data = self.srv.request("POST", "/api/discount-codes",
+                                         body={"code": "ENDPT1", "discount_type": "fixed",
+                                               "discount_value": 5000, "max_uses": 10})
+        code_id = data["discount_code"]["id"]
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                         body={"id": code_id, "discount_value": 3000})
+        self.assertEqual(status, 200)
+        self.assertEqual(data["discount_code"]["discount_value"], 3000)
+
+    def test_update_endpoint_invalid_type(self):
+        status, data = self.srv.request("POST", "/api/discount-codes",
+                                         body={"code": "ENDPT2", "discount_type": "fixed",
+                                               "discount_value": 5000, "max_uses": 0})
+        code_id = data["discount_code"]["id"]
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                         body={"id": code_id, "discount_type": "invalid"})
+        self.assertEqual(status, 400)
+
+    def test_update_endpoint_no_auth(self):
+        status, _ = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                      body={"id": 1, "discount_value": 100}, token=None)
+        self.assertEqual(status, 401)
+
+    def test_update_endpoint_missing_id(self):
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                         body={"discount_value": 100})
+        self.assertEqual(status, 400)
+
+    def test_delete_endpoint_success(self):
+        status, data = self.srv.request("POST", "/api/discount-codes",
+                                         body={"code": "DELET1", "discount_type": "fixed",
+                                               "discount_value": 1000, "max_uses": 0})
+        code_id = data["discount_code"]["id"]
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/delete",
+                                         body={"id": code_id})
+        self.assertEqual(status, 200)
+        self.assertTrue(data["ok"])
+
+    def test_delete_endpoint_no_auth(self):
+        status, _ = self.srv.request("POST", "/api/admin/discount-codes/delete",
+                                      body={"id": 1}, token=None)
+        self.assertEqual(status, 401)
+
+    def test_delete_endpoint_missing_id(self):
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/delete",
+                                         body={})
+        self.assertEqual(status, 400)
+
+    def test_delete_endpoint_nonexistent(self):
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/delete",
+                                         body={"id": 99999})
+        self.assertEqual(status, 404)
+
+    def test_toggle_active_via_update(self):
+        status, data = self.srv.request("POST", "/api/discount-codes",
+                                         body={"code": "TOGL1", "discount_type": "percent",
+                                               "discount_value": 15, "max_uses": 0})
+        code_id = data["discount_code"]["id"]
+        # Deactivate
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                         body={"id": code_id, "is_active": 0})
+        self.assertEqual(status, 200)
+        self.assertEqual(data["discount_code"]["is_active"], 0)
+        # Reactivate
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                         body={"id": code_id, "is_active": 1})
+        self.assertEqual(status, 200)
+        self.assertEqual(data["discount_code"]["is_active"], 1)
