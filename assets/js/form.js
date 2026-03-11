@@ -187,7 +187,23 @@ async function loadPartyDates() {
 var _apiDone = Promise.all([loadSiteContentAndPricing(), loadAccountInfo(), loadPartyDates()]).then(function() { return loadScarcity(); });
 var _timeout = new Promise(function(r) { setTimeout(r, 800); });
 Promise.race([_apiDone, _timeout]).then(revealPage);
-_apiDone.finally(revealPage);
+_apiDone.finally(function() {
+  revealPage();
+  /* URL 파라미터로 지점 자동 선택 */
+  var params = new URLSearchParams(location.search);
+  var preselect = params.get('branch');
+  if (preselect) {
+    var input = document.querySelector('input[name="branch"][value="' + CSS.escape(preselect) + '"]');
+    if (input) {
+      input.checked = true;
+      input.closest('.radio-card-label')?.classList.add('selected');
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      /* 지점 영역으로 스크롤 */
+      var section = input.closest('.form-group');
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+});
 
 /* =============================================
    PRICE DATA (loaded from API, fallback to defaults)

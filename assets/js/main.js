@@ -238,6 +238,9 @@ async function loadSiteContent() {
               const note = p.note || '';
               const card = document.createElement('div');
               card.className = 'price-card';
+              card.style.cursor = 'pointer';
+              card.setAttribute('role', 'link');
+              card.setAttribute('aria-label', branch + '점 신청하기');
               card.innerHTML =
                 '<div class="price-card-accent" aria-hidden="true"></div>' +
                 '<span class="price-card-badge">' + esc(branch) + '</span>' +
@@ -249,6 +252,9 @@ async function loadSiteContent() {
                   '<span class="price-val price-val-accent">' + esc(fmtPrice(p.female)) + '</span>' +
                   '<span style="font-size:var(--fs-xs);color:var(--muted)">원</span></div>' +
                 (note ? '<p class="price-note">' + esc(note) + '</p>' : '');
+              card.addEventListener('click', (function(b) {
+                return function() { location.href = 'form.html?branch=' + encodeURIComponent(b); };
+              })(branch));
               grid.appendChild(card);
             });
           }
