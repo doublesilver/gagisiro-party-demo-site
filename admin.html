@@ -2053,15 +2053,15 @@
 
     function loadCapacity() {
       Promise.all([
-        fetch(API_BASE + '/api/capacity', { headers: { 'Authorization': 'Bearer ' + state.token } }).then(function(r) { return r.ok ? r.json() : {}; }),
+        fetch(API_BASE + '/api/scarcity').then(function(r) { return r.ok ? r.json() : {}; }),
         fetch(API_BASE + '/api/party-dates', { headers: { 'Authorization': 'Bearer ' + state.token } }).then(function(r) { return r.ok ? r.json() : { dates: [] }; }),
         fetch(API_BASE + '/api/site-content').then(function(r) { return r.ok ? r.json() : {}; })
       ]).then(function(results) {
-        var capData = results[0];
+        var scarcityData = results[0];
         _partyDates = (results[1].dates || []);
         var siteContent = (results[2].content || {});
         try { _scarcityOverrides = JSON.parse(siteContent.scarcity_override || '{}'); } catch(e) { _scarcityOverrides = {}; }
-        renderCapacity(capData);
+        renderCapacity(scarcityData);
         renderPartyDatesList();
       }).catch(function() {
         document.getElementById('capacity-grid').innerHTML =
@@ -2191,27 +2191,31 @@
 
     function renderCapacity(data) {
       var grid = document.getElementById('capacity-grid');
-      var dates = data.dates || data;
-      var days = _defaultDays.slice();
+      var dates = data.dates || {};
+      /* 파티 날짜의 dayName을 기준으로 정원 카드 생성 */
+      var days = [];
+      var seen = {};
       _partyDates.forEach(function(pd) {
-        var key = pd.label || pd.date;
-        if (days.indexOf(key) === -1) days.push(key);
+        var key = pd.dayName || pd.label || pd.date;
+        if (!seen[key]) { seen[key] = true; days.push(key); }
       });
+      /* 파티 날짜가 없으면 기본 금/토/일 */
+      if (days.length === 0) days = _defaultDays.slice();
       var html = '';
 
       days.forEach(function(day) {
         var info = dates[day] || {};
-        var capacity = info.capacity != null ? info.capacity : 0;
-        var count    = info.count    != null ? info.count    : 0;
-        var pct = capacity > 0 ? Math.min(100, Math.round(count / capacity * 100)) : 0;
-        var level = pct < 50 ? 'low' : pct < 80 ? 'mid' : 'high';
+        var capacity = info.capacity != null ? info.capacity : 30;
+        var count = info.count != null ? info.count : 0;
+        var pct = capacity > 0 ? Math.min(100, Math.round(count / capacity * 100)) : (capacity === 0 ? 100 : 0);
+        var level = capacity === 0 ? 'high' : (pct < 50 ? 'low' : pct < 80 ? 'mid' : 'high');
 
         html += '<div class="capacity-card">' +
           '<div class="capacity-card-day">' + esc(day) + '</div>' +
-          '<div class="capacity-stat">' + count + ' / ' + capacity + '명 (' + pct + '%)</div>' +
+          '<div class="capacity-stat">' + count + ' / ' + (capacity === 0 ? '마감' : capacity + '명') + ' (' + pct + '%)</div>' +
           '<div class="capacity-bar-wrap"><div class="capacity-bar level-' + level + '" style="width:' + pct + '%"></div></div>' +
           '<div class="capacity-input-row">' +
-            '<input class="capacity-input" type="number" min="0" value="' + esc(capacity) + '" data-day="' + esc(day) + '" placeholder="정원" />' +
+            '<input class="capacity-input" type="number" min="0" value="' + esc(capacity) + '" data-day="' + esc(day) + '" placeholder="정원 (0=마감)" />' +
             '<button class="capacity-save-btn" data-day="' + esc(day) + '" type="button">저장</button>' +
           '</div>' +
         '</div>';

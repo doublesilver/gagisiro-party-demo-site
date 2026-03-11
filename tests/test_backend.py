@@ -472,11 +472,9 @@ class TestCapacityManagement(unittest.TestCase):
     def setUp(self):
         self.store = _make_store()
 
-    def test_get_capacity_settings_returns_defaults(self):
+    def test_get_capacity_settings_returns_empty_by_default(self):
         caps = self.store.get_capacity_settings()
-        self.assertEqual(caps["금요일"], 30)
-        self.assertEqual(caps["토요일"], 30)
-        self.assertEqual(caps["일요일"], 30)
+        self.assertEqual(caps, {})
 
     def test_set_capacity_updates_stored_value(self):
         self.store.set_capacity("금요일", 50)
@@ -518,6 +516,23 @@ class TestCapacityManagement(unittest.TestCase):
                 ))
         info = self.store.get_scarcity_info()
         self.assertEqual(info["금요일"]["level"], "마감")
+
+    def test_get_scarcity_info_level_마감_when_capacity_is_zero(self):
+        self.store.set_capacity("금요일", 0)
+        info = self.store.get_scarcity_info()
+        self.assertEqual(info["금요일"]["level"], "마감")
+
+    def test_get_scarcity_info_uses_party_dates_daynames(self):
+        """Scarcity uses party_dates dayNames as the base keys."""
+        self.store.upsert_site_content({
+            "party_dates": json.dumps([
+                {"date": "2026-03-20", "label": "20일(금)", "dayName": "금요일"},
+                {"date": "2026-03-21", "label": "21일(토)", "dayName": "토요일"},
+            ])
+        })
+        info = self.store.get_scarcity_info()
+        self.assertIn("금요일", info)
+        self.assertIn("토요일", info)
 
     def test_get_date_counts_excludes_취소_status(self):
         store = self.store

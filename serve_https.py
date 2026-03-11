@@ -159,10 +159,6 @@ class ApplicationStore:
             with self._sqlite_connection() as conn:
                 rows = conn.execute("SELECT day_key, capacity FROM capacity_settings").fetchall()
             settings = {r[0]: r[1] for r in rows}
-        # defaults
-        for day in ("금요일", "토요일", "일요일"):
-            if day not in settings:
-                settings[day] = 30
         return settings
 
     def set_capacity(self, day_key: str, capacity: int) -> dict:
@@ -206,15 +202,29 @@ class ApplicationStore:
     def get_scarcity_info(self) -> dict:
         caps = self.get_capacity_settings()
         counts = self.get_date_counts()
+        # party_dates에서 dayName 목록을 가져와 기준으로 사용
+        party_dates_raw = self.get_site_content_value("party_dates")
+        day_names = set()
+        if party_dates_raw:
+            try:
+                for pd in json.loads(party_dates_raw):
+                    if pd.get("dayName"):
+                        day_names.add(pd["dayName"])
+            except (json.JSONDecodeError, TypeError):  # pragma: no cover
+                pass
+        # party_dates가 없으면 기본 금/토/일
+        if not day_names:
+            day_names = {"금요일", "토요일", "일요일"}
+        all_days = day_names | set(caps.keys()) | set(counts.keys())
         result = {}
-        all_days = set(caps.keys()) | set(counts.keys())
         for day in all_days:
             cap = caps.get(day, 30)
             count = counts.get(day, 0)
-            ratio = count / cap if cap > 0 else 0
-            if ratio >= 1:
+            if cap == 0:
                 level = "마감"
-            elif ratio >= 0.8:
+            elif count >= cap:
+                level = "마감"
+            elif count / cap >= 0.8:
                 level = "마감임박"
             else:
                 level = "모집중"
