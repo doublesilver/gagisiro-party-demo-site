@@ -947,7 +947,14 @@
 <body>
 
   <!-- =================== LOGIN SCREEN =================== -->
-  <div id="login-screen">
+  <script>
+    /* 저장된 토큰이 있으면 로그인 화면 깜빡임 방지 */
+    if (localStorage.getItem('admin_token')) {
+      document.write('<div id="login-screen" style="display:none;">');
+    } else {
+      document.write('<div id="login-screen">');
+    }
+  </script>
     <div class="login-card">
       <img src="assets/images/logo-dark.png" alt="ODD PARTY" class="login-logo logo-dark" />
       <img src="assets/images/logo-light.png" alt="ODD PARTY" class="login-logo logo-light" style="display:none;" />
@@ -1138,6 +1145,13 @@
         <!-- ── 정원 관리 ── -->
         <section class="admin-section" id="sec-capacity">
           <h2 class="admin-section-title">날짜별 정원 설정</h2>
+
+          <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:var(--r-md);padding:12px 16px;margin-bottom:var(--sp-xl);font-size:var(--fs-xs);color:var(--muted);line-height:1.6;">
+            <strong style="color:var(--text);">상태 변경 안내</strong><br/>
+            • <strong>수동 설정</strong>: 상태 드롭다운에서 직접 변경한 값이 <strong>최우선</strong> 적용됩니다.<br/>
+            • <strong>자동 계산</strong>: 수동 설정이 없으면, 신청자 수 ÷ 정원 비율에 따라 자동으로 결정됩니다.<br/>
+            &nbsp;&nbsp;- 80% 미만 → 모집중 · 80% 이상 → 마감임박 · 100% 이상 또는 정원 0명 → 마감
+          </div>
 
           <!-- 파티 날짜 추가 -->
           <div class="content-group" style="margin-bottom:var(--sp-xl);">
@@ -1564,6 +1578,8 @@
       document.getElementById('logout-btn').addEventListener('click', handleLogout);
 
       if (state.token) {
+        /* 토큰이 있으면 먼저 shell 표시 후 비동기로 인증 확인 */
+        showShell();
         checkAuth();
       }
     })();
@@ -2069,17 +2085,13 @@
       });
     }
 
-    function initDefaultDates() {
-      _partyDates = _getDefaultPartyDates();
-      savePartyDates();
-    }
+
 
     function renderPartyDatesList() {
       var el = document.getElementById('party-dates-list');
       if (!el) return;
       if (_partyDates.length === 0) {
-        el.innerHTML = '<p style="color:var(--muted);margin-bottom:8px;">설정된 날짜가 없습니다. 신청 페이지에 기본 금/토/일이 표시됩니다.</p>' +
-          '<button class="save-btn" style="padding:6px 14px;font-size:var(--fs-xs);" onclick="initDefaultDates()">기본 금/토/일 날짜 생성</button>';
+        el.innerHTML = '<p style="color:var(--muted);margin-bottom:8px;">설정된 날짜가 없습니다. 위에서 날짜를 추가해 주세요.</p>';
         return;
       }
       var scarcityColors = { '모집중': '#22c55e', '마감임박': '#f59e0b', '마감': '#ef4444' };
