@@ -476,8 +476,10 @@ class ApplicationStore:
 
     def delete_discount_code(self, code_id: int) -> bool:
         if self.kind == "postgres":  # pragma: no cover
-            self._query_one_postgres("DELETE FROM discount_codes WHERE id = %s", (code_id,))
-            return True
+            with self._postgres_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("DELETE FROM discount_codes WHERE id = %s", (code_id,))
+                    return cur.rowcount > 0
         else:
             with self._sqlite_connection() as conn:
                 cur = conn.execute("DELETE FROM discount_codes WHERE id = ?", (code_id,))
@@ -560,7 +562,9 @@ class ApplicationStore:
 
     def delete_faq_item(self, faq_id: int) -> None:
         if self.kind == "postgres":  # pragma: no cover
-            self._query_one_postgres("DELETE FROM faq WHERE id = %s", (faq_id,))
+            with self._postgres_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("DELETE FROM faq WHERE id = %s", (faq_id,))
         else:
             with self._sqlite_connection() as conn:
                 conn.execute("DELETE FROM faq WHERE id = ?", (faq_id,))
@@ -570,7 +574,9 @@ class ApplicationStore:
         if not existing:
             return False
         if self.kind == "postgres":  # pragma: no cover
-            self._query_one_postgres("DELETE FROM applications WHERE id = %s", (application_id,))
+            with self._postgres_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("DELETE FROM applications WHERE id = %s", (application_id,))
         else:
             with self._sqlite_connection() as conn:
                 conn.execute("DELETE FROM applications WHERE id = ?", (application_id,))
