@@ -661,12 +661,24 @@ class ApplicationStore:
         if coupon and len(coupon) > 40:
             raise ValidationError("할인코드는 40자 이내로 입력해 주세요.")
 
-        is_closed_branch = price_amount == 0 or location_note == "마감"
+        # Apply discount if coupon is valid
+        discount_applied = 0
+        if coupon:
+            discount_info = STORE.validate_discount_code(coupon)
+            if discount_info:
+                if discount_info["discount_type"] == "percent":
+                    discount_applied = round(price_amount * discount_info["discount_value"] / 100)
+                else:
+                    discount_applied = discount_info["discount_value"]
+                price_amount = max(0, price_amount - discount_applied)
+                price_text = f"{gender_label} {price_amount:,}원 (할인 적용)"
+
+        is_closed_branch = (price_amount == 0 and discount_applied == 0) or location_note == "마감"
         status = "보류" if is_closed_branch else "입금대기"
         admin_note = (
             "현재 마감되어 확인필요"
             if is_closed_branch
-            else ("할인코드 확인 필요" if coupon else "신규 신청 접수")
+            else (f"할인코드 {coupon} 적용 (-{discount_applied:,}원)" if discount_applied > 0 else ("할인코드 확인 필요" if coupon and discount_applied == 0 else "신규 신청 접수"))
         )
 
         return {
