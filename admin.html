@@ -994,8 +994,7 @@
     <div class="admin-tabs" id="admin-tabs">
       <button class="admin-tab-btn active" data-target="sec-dashboard">대시보드</button>
       <button class="admin-tab-btn" data-target="sec-capacity">날짜별 정원</button>
-      <button class="admin-tab-btn" data-target="sec-branch">지점 관리</button>
-      <button class="admin-tab-btn" data-target="sec-pricing">가격 설정</button>
+      <button class="admin-tab-btn" data-target="sec-branch">지점/가격</button>
       <button class="admin-tab-btn" data-target="sec-faq">FAQ</button>
       <button class="admin-tab-btn" data-target="sec-discount">할인코드</button>
       <button class="admin-tab-btn" data-target="sec-content">문구 수정</button>
@@ -1020,12 +1019,7 @@
           </li>
           <li class="sidebar-nav-item">
             <button class="sidebar-nav-btn" data-target="sec-branch" type="button">
-              <span class="sidebar-nav-icon">🏢</span> 지점 관리
-            </button>
-          </li>
-          <li class="sidebar-nav-item">
-            <button class="sidebar-nav-btn" data-target="sec-pricing" type="button">
-              <span class="sidebar-nav-icon">💰</span> 가격 설정
+              <span class="sidebar-nav-icon">🏢</span> 지점/가격 관리
             </button>
           </li>
           <li class="sidebar-nav-item">
@@ -1161,6 +1155,12 @@
               </label>
               <button class="save-btn" type="button" onclick="saveThresholds()" style="padding:4px 12px;font-size:var(--fs-xs);">저장</button>
             </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+              <label style="display:flex;align-items:center;gap:4px;color:var(--text);">
+                잔여석 배지 문구 (비워두면 자동):
+                <input type="text" id="scarcity-badge-text" placeholder="예: 이번 주 파티 마감 임박!" style="width:260px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:var(--fs-xs);" />
+              </label>
+            </div>
           </div>
 
           <!-- 파티 날짜 추가 -->
@@ -1188,8 +1188,8 @@
 
         <!-- ── 지점 관리 ── -->
         <section class="admin-section" id="sec-branch">
-          <h2 class="admin-section-title">지점 관리</h2>
-          <p style="color:var(--muted);font-size:var(--fs-sm);margin-bottom:var(--sp-lg);">지점을 추가/수정/삭제합니다. 변경 후 반드시 '가격 저장' 버튼을 눌러주세요.</p>
+          <h2 class="admin-section-title">지점/가격 관리</h2>
+          <p style="color:var(--muted);font-size:var(--fs-sm);margin-bottom:var(--sp-lg);">지점별 참가비, 2부 옵션을 설정합니다. 변경 후 반드시 '저장' 버튼을 눌러주세요.</p>
 
           <div id="branch-list-container">
             <!-- 지점 목록이 JS로 동적 생성됩니다 -->
@@ -1198,23 +1198,14 @@
             ＋ 지점 추가
           </button>
 
-          <button type="button" onclick="savePricing()" style="margin-top:var(--sp-md);font-size:var(--fs-sm);padding:10px 24px;background:var(--gradient-btn);color:#fff;border:none;border-radius:var(--r-md);cursor:pointer;font-weight:700;">지점 정보 저장</button>
-          <span class="save-msg" id="branch-save-msg"></span>
-        </section>
-
-        <!-- ── 가격 설정 ── -->
-        <section class="admin-section" id="sec-pricing">
-          <h2 class="admin-section-title">가격 설정</h2>
-          <p style="color:var(--muted);font-size:var(--fs-sm);margin-bottom:var(--sp-lg);">지점별 참가비와 2부 옵션을 설정합니다. 변경 시 신청 페이지에 즉시 반영됩니다.</p>
-
           <!-- 가격 계산 미리보기 -->
           <div class="price-preview" id="price-preview">
             <p class="price-preview-title">가격 조합 미리보기</p>
             <div class="price-preview-grid" id="price-preview-grid"></div>
           </div>
 
-          <button type="button" onclick="savePricing()" style="margin-top:var(--sp-md);font-size:var(--fs-xs);padding:4px 12px;background:#3498db;color:#fff;border:none;border-radius:6px;cursor:pointer;">가격 저장</button>
-          <span class="save-msg" id="price-save-msg"></span>
+          <button type="button" onclick="savePricing()" style="margin-top:var(--sp-md);font-size:var(--fs-sm);padding:10px 24px;background:var(--gradient-btn);color:#fff;border:none;border-radius:var(--r-md);cursor:pointer;font-weight:700;">지점/가격 저장</button>
+          <span class="save-msg" id="branch-save-msg"></span>
         </section>
 
         <!-- ── 콘텐츠 관리 (비주얼 에디터) ── -->
@@ -1225,16 +1216,8 @@
           <!-- 기타 설정 (화면에 보이지 않는 필드) -->
           <div class="extra-settings-row">
             <div class="extra-setting-item">
-              <label for="scarcity-badge-text">잔여석 배지 (비워두면 자동)</label>
-              <input type="text" id="scarcity-badge-text" placeholder="예: 이번 주 파티 마감 임박!" />
-            </div>
-            <div class="extra-setting-item">
               <label for="sticky-cta-text">하단 고정 CTA 문구</label>
               <input type="text" id="sticky-cta-text" placeholder="배지 문구와 동일" />
-            </div>
-            <div class="extra-setting-item">
-              <label for="instagram-id">인스타그램 아이디</label>
-              <input type="text" id="instagram-id" placeholder="odd_party" />
             </div>
           </div>
 
@@ -1403,6 +1386,17 @@
             <p class="settings-msg" id="account-msg"></p>
           </div>
 
+          <!-- SNS 연동 -->
+          <div class="settings-card" style="margin-bottom:var(--sp-xl);">
+            <p class="settings-card-title">SNS 연동</p>
+            <div class="settings-field">
+              <label class="settings-label" for="instagram-id">인스타그램 아이디</label>
+              <input class="settings-input" type="text" id="instagram-id" placeholder="odd_party" />
+            </div>
+            <button class="settings-submit" type="button" onclick="saveInstagramId()">인스타그램 아이디 저장</button>
+            <p class="settings-msg" id="instagram-msg"></p>
+          </div>
+
           <!-- 비밀번호 변경 -->
           <div class="settings-card">
             <p class="settings-card-title">비밀번호 변경</p>
@@ -1446,7 +1440,7 @@
         <button class="bottom-nav-btn" data-target="sec-capacity" type="button">
           <span class="bottom-nav-icon">🗓️</span>정원
         </button>
-        <button class="bottom-nav-btn" data-target="sec-pricing" type="button">
+        <button class="bottom-nav-btn" data-target="sec-branch" type="button">
           <span class="bottom-nav-icon">💰</span>가격
         </button>
         <button class="bottom-nav-btn" data-target="sec-content" type="button">
@@ -1462,9 +1456,6 @@
     <div class="modal-overlay" id="more-menu-overlay" style="display:none;align-items:flex-end;">
       <div class="modal-card" style="max-width:100%;border-radius:var(--r-lg) var(--r-lg) 0 0;padding:var(--sp-lg);">
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-md);text-align:center;">
-          <button class="bottom-nav-btn" data-target="sec-branch" style="min-width:auto;" type="button">
-            <span class="bottom-nav-icon">🏢</span>지점
-          </button>
           <button class="bottom-nav-btn" data-target="sec-faq" style="min-width:auto;" type="button">
             <span class="bottom-nav-icon">❓</span>FAQ
           </button>
@@ -1574,6 +1565,7 @@
         showShell();
         /* URL hash에서 이전 섹션 복원 */
         var hashSection = location.hash.replace('#', '');
+        if (hashSection === 'sec-pricing') hashSection = 'sec-branch';
         if (hashSection && document.getElementById(hashSection)) {
           switchSection(hashSection);
         }
@@ -1693,11 +1685,10 @@
 
       if (targetId === 'sec-dashboard') loadDashboard();
       if (targetId === 'sec-capacity') loadCapacity();
-      if (targetId === 'sec-branch')   { loadPricing(); }
-      if (targetId === 'sec-pricing')  { loadPricing(); setTimeout(updatePricePreview, 500); }
+      if (targetId === 'sec-branch')   { loadPricing(); setTimeout(updatePricePreview, 300); }
       if (targetId === 'sec-faq')      loadFaqList();
       if (targetId === 'sec-content')  { loadSiteContent(); loadAccountIntoIframes(); }
-      if (targetId === 'sec-settings') loadAccountInfo();
+      if (targetId === 'sec-settings') { loadAccountInfo(); loadSettingsContent(); }
     }
 
     /* ============================================================
@@ -2084,6 +2075,9 @@
         var closedEl = document.getElementById('threshold-closed');
         if (urgentEl) urgentEl.value = _thresholdUrgent;
         if (closedEl) closedEl.value = _thresholdClosed;
+        /* Populate scarcity badge text */
+        var badgeTextEl = document.getElementById('scarcity-badge-text');
+        if (badgeTextEl && siteContent['scarcity-badge-text']) badgeTextEl.value = siteContent['scarcity-badge-text'];
         renderCapacity(scarcityData);
         renderPartyDatesList();
       }).catch(function() {
@@ -2165,10 +2159,13 @@
       if (isNaN(closed) || closed < urgent) { showToast('마감 기준은 마감임박 기준 이상이어야 합니다.', true); return; }
       _thresholdUrgent = urgent;
       _thresholdClosed = closed;
+      var badgeText = (document.getElementById('scarcity-badge-text').value || '').trim();
+      var thresholdContent = { scarcity_threshold_urgent: String(urgent), scarcity_threshold_closed: String(closed) };
+      if (badgeText) thresholdContent['scarcity-badge-text'] = badgeText;
       fetch(API_BASE + '/api/site-content', {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ content: { scarcity_threshold_urgent: String(urgent), scarcity_threshold_closed: String(closed) } })
+        body: JSON.stringify({ content: thresholdContent })
       })
       .then(function(r) {
         if (!r.ok) throw new Error();
@@ -2325,7 +2322,7 @@
        CONTENT MANAGEMENT
     ============================================================ */
     var CONTENT_FIELD_IDS = [
-      'hero-title', 'main-hero-sub', 'scarcity-badge-text', 'sticky-cta-text', 'instagram-id',
+      'hero-title', 'main-hero-sub', 'sticky-cta-text',
       'intro-title', 'main-about-p1', 'main-about-p2',
       'faq-title', 'price-title',
       'main-price-info', 'main-price-note-건대', 'main-price-note-영등포',
@@ -2448,7 +2445,6 @@
           var field = inp.getAttribute('data-field');
           if (field === 'note') _branches[idx].note = inp.value;
           else _branches[idx][field] = parseInt(inp.value) || 0;
-          updatePricePreview();
           updatePricePreview();
         });
       });
@@ -2841,6 +2837,34 @@
         showToast('계좌 정보가 저장되었습니다.');
       })
       .catch(function() { showToast('계좌 정보 저장 실패', true); });
+    }
+
+    /* Load instagram-id when settings section opens */
+    function loadSettingsContent() {
+      fetch(API_BASE + '/api/site-content')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) {
+        if (!d) return;
+        var content = d.content || {};
+        var igEl = document.getElementById('instagram-id');
+        if (igEl && content['instagram-id']) igEl.value = content['instagram-id'];
+      })
+      .catch(function() {});
+    }
+
+    function saveInstagramId() {
+      var igId = (document.getElementById('instagram-id').value || '').trim();
+      if (!igId) { showToast('인스타그램 아이디를 입력해주세요.', true); return; }
+      fetch(API_BASE + '/api/site-content', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ content: { 'instagram-id': igId } })
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error();
+        showToast('인스타그램 아이디가 저장되었습니다.');
+      })
+      .catch(function() { showToast('저장 실패', true); });
     }
 
     /* ============================================================
@@ -3303,26 +3327,18 @@
       .catch(function() {});
     }
 
-    /* Extra settings (scarcity, cta, instagram) - bind input to hidden + iframe sync */
-    ['scarcity-badge-text', 'sticky-cta-text', 'instagram-id'].forEach(function(id) {
+    /* Extra settings (cta) - bind input to hidden + iframe sync */
+    ['sticky-cta-text'].forEach(function(id) {
       var input = document.getElementById(id);
       if (!input) return;
       input.addEventListener('input', function() {
         pendingChanges[id] = input.value;
         updatePendingBadge();
-        /* Try to update in main iframe */
         try {
           var iframe = document.getElementById('preview-main');
           var iDoc = iframe.contentDocument || iframe.contentWindow.document;
-          var iframeEl = iDoc.getElementById(id === 'scarcity-badge-text' ? 'scarcity-badge' : id === 'sticky-cta-text' ? 'sticky-cta-text' : null);
-          if (iframeEl) {
-            if (id === 'scarcity-badge-text') {
-              var textSpan = iframeEl.querySelector('.scarcity-text');
-              if (textSpan) textSpan.textContent = input.value;
-            } else {
-              iframeEl.textContent = input.value;
-            }
-          }
+          var iframeEl = iDoc.getElementById('sticky-cta-text');
+          if (iframeEl) iframeEl.textContent = input.value;
         } catch(e) {}
       });
     });
