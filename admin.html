@@ -2128,6 +2128,21 @@
       savePartyDates();
     }
 
+    function changeCapacityStatus(dayName, newStatus) {
+      _scarcityOverrides[dayName] = newStatus;
+      fetch(API_BASE + '/api/site-content', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ content: { scarcity_override: JSON.stringify(_scarcityOverrides) } })
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error();
+        showToast(dayName + ' 상태가 "' + newStatus + '"(으)로 변경되었습니다.');
+        loadCapacity();
+      })
+      .catch(function() { showToast('상태 변경 실패', true); });
+    }
+
     function changePartyDateStatus(idx, newStatus) {
       var dayName = _partyDates[idx].dayName;
       if (!dayName) return;
@@ -2203,20 +2218,31 @@
       if (days.length === 0) days = _defaultDays.slice();
       var html = '';
 
+      var scarcityColors = { '모집중': '#22c55e', '마감임박': '#f59e0b', '마감': '#ef4444' };
       days.forEach(function(day) {
         var info = dates[day] || {};
         var capacity = info.capacity != null ? info.capacity : 30;
         var count = info.count != null ? info.count : 0;
         var pct = capacity > 0 ? Math.min(100, Math.round(count / capacity * 100)) : (capacity === 0 ? 100 : 0);
         var level = capacity === 0 ? 'high' : (pct < 50 ? 'low' : pct < 80 ? 'mid' : 'high');
+        /* 수동 오버라이드 우선, 없으면 자동 계산된 level 사용 */
+        var currentStatus = _scarcityOverrides[day] || info.level || '모집중';
+        var statusColor = scarcityColors[currentStatus] || '#22c55e';
 
         html += '<div class="capacity-card">' +
           '<div class="capacity-card-day">' + esc(day) + '</div>' +
           '<div class="capacity-stat">' + count + ' / ' + (capacity === 0 ? '마감' : capacity + '명') + ' (' + pct + '%)</div>' +
           '<div class="capacity-bar-wrap"><div class="capacity-bar level-' + level + '" style="width:' + pct + '%"></div></div>' +
-          '<div class="capacity-input-row">' +
+          '<div class="capacity-input-row" style="margin-bottom:6px;">' +
             '<input class="capacity-input" type="number" min="0" value="' + esc(capacity) + '" data-day="' + esc(day) + '" placeholder="정원 (0=마감)" />' +
             '<button class="capacity-save-btn" data-day="' + esc(day) + '" type="button">저장</button>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);">' +
+            '<span style="color:var(--muted);">상태:</span>' +
+            '<select onchange="changeCapacityStatus(\'' + esc(day).replace(/'/g, "\\'") + '\', this.value)" ' +
+              'style="padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:' + statusColor + ';font-weight:600;font-size:var(--fs-xs);cursor:pointer;">' +
+              ['모집중', '마감임박', '마감'].map(function(s) { return '<option value="' + s + '"' + (s === currentStatus ? ' selected' : '') + '>' + s + '</option>'; }).join('') +
+            '</select>' +
           '</div>' +
         '</div>';
       });
