@@ -322,6 +322,55 @@ class TestNormalizePayload(unittest.TestCase):
         result = self._normalize(_minimal_payload(branch="건대", gender="male"))
         self.assertEqual(result["price_amount"], 50000)
 
+    def test_part2_prepay_adds_part2_price(self):
+        """When part2pay=prepay, price includes 2부 금액 with discount."""
+        # 건대 남성 33000 + part2_base 18000 = 51000 * 0.9 = 45900
+        result = self._normalize({**_minimal_payload(branch="건대", gender="male"), "part2pay": "prepay"})
+        self.assertEqual(result["price_amount"], 45900)
+        self.assertIn("1부+2부", result["price_text"])
+
+    def test_part2_prepay_admin_note(self):
+        result = self._normalize({**_minimal_payload(), "part2pay": "prepay"})
+        self.assertIn("2부 사전결제", result["admin_note"])
+
+    def test_part2_onsite_does_not_change_price(self):
+        """part2pay=onsite should not change the price."""
+        result_none = self._normalize(_minimal_payload(branch="건대", gender="male"))
+        result_onsite = self._normalize({**_minimal_payload(branch="건대", gender="male"), "part2pay": "onsite"})
+        self.assertEqual(result_none["price_amount"], result_onsite["price_amount"])
+        self.assertIn("2부 현장결제", result_onsite["admin_note"])
+
+    def test_part2_prepay_with_discount_code(self):
+        """Discount code applied on top of 1부+2부 combined price."""
+        self.store.create_discount_code("PART2TEST", "fixed", 5000, 10)
+        result = self._normalize({**_minimal_payload(branch="건대", gender="male"), "part2pay": "prepay", "discount": "PART2TEST"})
+        # 45900 - 5000 = 40900
+        self.assertEqual(result["price_amount"], 40900)
+        self.assertIn("1부+2부", result["price_text"])
+        self.assertIn("할인", result["price_text"])
+        self.assertIn("할인코드", result["admin_note"])
+        self.assertIn("2부 사전결제", result["admin_note"])
+
+    def test_percent_discount_applied_correctly(self):
+        """Percent discount type calculates correctly."""
+        self.store.create_discount_code("PCT20", "percent", 20, 10)
+        result = self._normalize(_minimal_payload(branch="건대", gender="male", discount="PCT20"))
+        # 33000 * 20% = 6600 discount → 26400
+        self.assertEqual(result["price_amount"], 26400)
+        self.assertIn("할인 적용", result["price_text"])
+
+    def test_part2_prepay_custom_part2_pricing(self):
+        """Custom part2_base and part2_discount from admin settings."""
+        custom_pricing = {
+            "건대": {"male": 33000, "female": 23000},
+            "part2_base": 20000,
+            "part2_discount": 20,
+        }
+        self.store.upsert_site_content({"pricing": json.dumps(custom_pricing)})
+        # (33000 + 20000) * 0.8 = 42400
+        result = self._normalize({**_minimal_payload(branch="건대", gender="male"), "part2pay": "prepay"})
+        self.assertEqual(result["price_amount"], 42400)
+
 
 class TestApplicationStoreCRUD(unittest.TestCase):
 
@@ -2146,7 +2195,7 @@ class TestDiscountCodeUpdateDelete(unittest.TestCase):
         self.assertFalse(store.delete_discount_code(99999))
 
 
-class TestDiscountCodeEndpoints(TestHTTPBase):
+class TestDiscountCodeAdminEndpoints(TestHTTPBase):
     """Tests for /api/admin/discount-codes/update and /delete endpoints."""
 
     def test_update_endpoint_success(self):
@@ -2218,3 +2267,20 @@ class TestDiscountCodeEndpoints(TestHTTPBase):
                                          body={"id": code_id, "is_active": 1})
         self.assertEqual(status, 200)
         self.assertEqual(data["discount_code"]["is_active"], 1)
+
+    def test_update_endpoint_discount_type_and_max_uses(self):
+        """Cover updating discount_type (valid) and max_uses fields."""
+        status, data = self.srv.request("POST", "/api/discount-codes",
+                                         body={"code": "UPDT3", "discount_type": "fixed",
+                                               "discount_value": 1000, "max_uses": 5})
+        code_id = data["discount_code"]["id"]
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                         body={"id": code_id, "discount_type": "percent", "max_uses": 20})
+        self.assertEqual(status, 200)
+        self.assertEqual(data["discount_code"]["discount_type"], "percent")
+        self.assertEqual(data["discount_code"]["max_uses"], 20)
+
+    def test_update_endpoint_nonexistent_returns_404(self):
+        status, data = self.srv.request("POST", "/api/admin/discount-codes/update",
+                                         body={"id": 99999, "discount_value": 100})
+        self.assertEqual(status, 404)

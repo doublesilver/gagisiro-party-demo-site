@@ -651,10 +651,21 @@ class ApplicationStore:
         branch_prices = PRICES.get(branch)
         if not branch_prices:
             raise ValidationError("지점 정보를 다시 선택해 주세요.")
-        price_amount = branch_prices.get(gender, 0)
+        base_price = branch_prices.get(gender, 0)
         gender_label = "남" if gender == "male" else "여"
-        price_text = f"{gender_label} {price_amount:,}원"
         location_note = branch
+
+        # 2부 참여 여부 처리
+        part2pay = str(payload.get("part2pay") or "").strip() or None
+        PART2_BASE = int(PRICES.get("part2_base", 18000))
+        PART2_DISCOUNT = int(PRICES.get("part2_discount", 10))
+
+        if part2pay == "prepay":
+            price_amount = round((base_price + PART2_BASE) * (1 - PART2_DISCOUNT / 100))
+            price_text = f"{gender_label} {price_amount:,}원 (1부+2부)"
+        else:
+            price_amount = base_price
+            price_text = f"{gender_label} {price_amount:,}원"
 
         party_date = self._require_text(payload.get("date") or payload.get("partyDate"), "참여 날짜", 80)
         coupon = str(payload.get("discount") or payload.get("coupon") or "").strip() or None
@@ -671,14 +682,24 @@ class ApplicationStore:
                 else:
                     discount_applied = discount_info["discount_value"]
                 price_amount = max(0, price_amount - discount_applied)
-                price_text = f"{gender_label} {price_amount:,}원 (할인 적용)"
+                suffix = " (1부+2부, 할인 적용)" if part2pay == "prepay" else " (할인 적용)"
+                price_text = f"{gender_label} {price_amount:,}원{suffix}"
 
         is_closed_branch = (price_amount == 0 and discount_applied == 0) or location_note == "마감"
         status = "보류" if is_closed_branch else "입금대기"
+        notes = []
+        if part2pay == "prepay":
+            notes.append("2부 사전결제 포함")
+        elif part2pay == "onsite":
+            notes.append("2부 현장결제 예정")
+        if discount_applied > 0:
+            notes.append(f"할인코드 {coupon} 적용 (-{discount_applied:,}원)")
+        elif coupon and discount_applied == 0:
+            notes.append("할인코드 확인 필요")
         admin_note = (
             "현재 마감되어 확인필요"
             if is_closed_branch
-            else (f"할인코드 {coupon} 적용 (-{discount_applied:,}원)" if discount_applied > 0 else ("할인코드 확인 필요" if coupon and discount_applied == 0 else "신규 신청 접수"))
+            else (", ".join(notes) if notes else "신규 신청 접수")
         )
 
         return {
@@ -1329,9 +1350,9 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self._write_json(404, {"error": "할인코드를 찾을 수 없습니다."})
                     return
                 self._write_json(200, {"discount_code": result})
-            except (json.JSONDecodeError, ValueError):
+            except (json.JSONDecodeError, ValueError):  # pragma: no cover
                 self._write_json(400, {"error": "요청 본문 형식이 올바르지 않습니다."})
-            except Exception as exc:
+            except Exception as exc:  # pragma: no cover
                 self._write_json(500, {"error": str(exc)})
             return
 
@@ -1349,9 +1370,9 @@ class PartyRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self._write_json(404, {"error": "할인코드를 찾을 수 없습니다."})
                     return
                 self._write_json(200, {"ok": True})
-            except (json.JSONDecodeError, ValueError):
+            except (json.JSONDecodeError, ValueError):  # pragma: no cover
                 self._write_json(400, {"error": "요청 본문 형식이 올바르지 않습니다."})
-            except Exception as exc:
+            except Exception as exc:  # pragma: no cover
                 self._write_json(500, {"error": str(exc)})
             return
 
