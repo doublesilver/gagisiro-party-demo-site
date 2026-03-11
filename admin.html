@@ -2099,14 +2099,16 @@
       html += '<thead><tr style="text-align:left;color:var(--muted);border-bottom:1px solid var(--border);">';
       html += '<th style="padding:6px;">표시명</th><th style="padding:6px;">날짜</th><th style="padding:6px;">요일</th><th style="padding:6px;">상태</th><th style="padding:6px;text-align:right;">관리</th></tr></thead><tbody>';
       _partyDates.forEach(function(d, i) {
-        var currentStatus = _scarcityOverrides[d.dayName] || '모집중';
-        var statusColor = scarcityColors[currentStatus] || '#22c55e';
+        var isManual = _scarcityOverrides.hasOwnProperty(d.dayName);
+        var currentStatus = isManual ? _scarcityOverrides[d.dayName] : '';
+        var statusColor = isManual ? (scarcityColors[currentStatus] || '#22c55e') : 'var(--muted)';
         html += '<tr style="border-bottom:1px solid var(--border);">';
         html += '<td style="padding:6px;font-weight:600;">' + esc(d.label || d.date) + '</td>';
         html += '<td style="padding:6px;">' + esc(d.date || '') + '</td>';
         html += '<td style="padding:6px;">' + esc(d.dayName || '') + '</td>';
         html += '<td style="padding:6px;">';
         html += '<select onchange="changePartyDateStatus(' + i + ', this.value)" style="padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:' + statusColor + ';font-weight:600;font-size:var(--fs-xs);cursor:pointer;">';
+        html += '<option value=""' + (!isManual ? ' selected' : '') + '>자동</option>';
         ['모집중', '마감임박', '마감'].forEach(function(s) {
           html += '<option value="' + s + '"' + (s === currentStatus ? ' selected' : '') + '>' + s + '</option>';
         });
@@ -2141,7 +2143,15 @@
     }
 
     function changeCapacityStatus(dayName, newStatus) {
-      _scarcityOverrides[dayName] = newStatus;
+      if (newStatus === '') {
+        delete _scarcityOverrides[dayName];
+      } else {
+        _scarcityOverrides[dayName] = newStatus;
+      }
+      _saveScarcityOverrides(dayName, newStatus === '' ? '자동' : newStatus);
+    }
+
+    function _saveScarcityOverrides(dayName, displayStatus) {
       fetch(API_BASE + '/api/site-content', {
         method: 'POST',
         headers: authHeaders(),
@@ -2149,7 +2159,7 @@
       })
       .then(function(r) {
         if (!r.ok) throw new Error();
-        showToast(dayName + ' 상태가 "' + newStatus + '"(으)로 변경되었습니다.');
+        showToast(dayName + ' 상태가 "' + displayStatus + '"(으)로 변경되었습니다.');
         loadCapacity();
       })
       .catch(function() { showToast('상태 변경 실패', true); });
@@ -2158,19 +2168,12 @@
     function changePartyDateStatus(idx, newStatus) {
       var dayName = _partyDates[idx].dayName;
       if (!dayName) return;
-      _scarcityOverrides[dayName] = newStatus;
-      /* Save scarcity overrides to site content */
-      fetch(API_BASE + '/api/site-content', {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ content: { scarcity_override: JSON.stringify(_scarcityOverrides) } })
-      })
-      .then(function(r) {
-        if (!r.ok) throw new Error();
-        showToast(dayName + ' 상태가 "' + newStatus + '"(으)로 변경되었습니다.');
-        renderPartyDatesList();
-      })
-      .catch(function() { showToast('상태 변경 실패', true); });
+      if (newStatus === '') {
+        delete _scarcityOverrides[dayName];
+      } else {
+        _scarcityOverrides[dayName] = newStatus;
+      }
+      _saveScarcityOverrides(dayName, newStatus === '' ? '자동' : newStatus);
     }
 
     function savePartyDates() {
@@ -2238,8 +2241,10 @@
         var pct = capacity > 0 ? Math.min(100, Math.round(count / capacity * 100)) : (capacity === 0 ? 100 : 0);
         var level = capacity === 0 ? 'high' : (pct < 50 ? 'low' : pct < 80 ? 'mid' : 'high');
         /* 수동 오버라이드 우선, 없으면 자동 계산된 level 사용 */
-        var currentStatus = _scarcityOverrides[day] || info.level || '모집중';
-        var statusColor = scarcityColors[currentStatus] || '#22c55e';
+        var isManual = _scarcityOverrides.hasOwnProperty(day);
+        var currentStatus = isManual ? _scarcityOverrides[day] : '';
+        var displayLevel = isManual ? currentStatus : (info.level || '모집중');
+        var statusColor = isManual ? (scarcityColors[currentStatus] || '#22c55e') : 'var(--muted)';
 
         html += '<div class="capacity-card">' +
           '<div class="capacity-card-day">' + esc(day) + '</div>' +
@@ -2253,7 +2258,8 @@
             '<span style="color:var(--muted);">상태:</span>' +
             '<select onchange="changeCapacityStatus(\'' + esc(day).replace(/'/g, "\\'") + '\', this.value)" ' +
               'style="padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:' + statusColor + ';font-weight:600;font-size:var(--fs-xs);cursor:pointer;">' +
-              ['모집중', '마감임박', '마감'].map(function(s) { return '<option value="' + s + '"' + (s === currentStatus ? ' selected' : '') + '>' + s + '</option>'; }).join('') +
+              '<option value=""' + (!isManual ? ' selected' : '') + '>자동 (' + (info.level || '모집중') + ')</option>' +
+              ['모집중', '마감임박', '마감'].map(function(s) { return '<option value="' + s + '"' + (s === currentStatus && isManual ? ' selected' : '') + '>' + s + '</option>'; }).join('') +
             '</select>' +
           '</div>' +
         '</div>';
