@@ -1180,6 +1180,7 @@
                   <th>지점/금액</th>
                   <th>파티날짜</th>
                   <th>쿠폰</th>
+                  <th>인스타</th>
                   <th>상태</th>
                   <th>관리자 메모</th>
                   <th>ID</th>
@@ -2015,6 +2016,7 @@
           '<td>' + esc(a.branch || '') + (a.priceText ? ' / ' + esc(a.priceText) : '') + '</td>' +
           '<td>' + esc(a.partyDate || '—') + '</td>' +
           '<td class="cell-coupon">' + esc(a.coupon || '') + '</td>' +
+          '<td>' + (a.instagram ? '@' + esc(a.instagram) : '—') + '</td>' +
           '<td>' + statusHtml + '</td>' +
           '<td><input class="note-input" type="text" value="' + esc(a.adminNote || '') + '" data-id="' + esc(a.id) + '" placeholder="메모…" /></td>' +
           '<td class="cell-id">' + esc(a.id) + '</td>' +
@@ -3052,6 +3054,7 @@
         { k: '파티날짜', v: app.partyDate || '—' },
         { k: '금액', v: app.priceText || (app.totalPrice ? app.totalPrice.toLocaleString() + '원' : '—') },
         { k: '2부 참여', v: app.part2pay === 'prepay' ? '사전결제' : app.part2pay === 'onsite' ? '현장결제' : '미참여' },
+        { k: '인스타그램', v: app.instagram ? '@' + app.instagram : '—' },
         { k: '쿠폰', v: app.coupon || '—' },
         { k: '상태', v: app.status || '입금대기' },
         { k: '관리자 메모', v: app.adminNote || '—' },

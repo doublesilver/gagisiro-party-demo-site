@@ -102,7 +102,8 @@ class ApplicationStore:
                     party_date TEXT NOT NULL,
                     coupon TEXT,
                     status TEXT NOT NULL,
-                    admin_note TEXT NOT NULL
+                    admin_note TEXT NOT NULL,
+                    instagram TEXT
                 )
                 """
             )
@@ -150,6 +151,11 @@ class ApplicationStore:
                 )
                 """
             )
+            # 기존 DB 마이그레이션: instagram 컬럼 추가
+            try:
+                connection.execute("ALTER TABLE applications ADD COLUMN instagram TEXT")
+            except Exception:
+                pass  # 이미 존재하면 무시
 
     def get_capacity_settings(self) -> dict:
         if self.kind == "postgres":  # pragma: no cover
@@ -251,8 +257,8 @@ class ApplicationStore:
                 """
                 INSERT INTO applications (
                     name, age, phone, branch, price_text, price_amount,
-                    location_note, party_date, coupon, status, admin_note
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    location_note, party_date, coupon, status, admin_note, instagram
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     normalized["name"],
@@ -266,6 +272,7 @@ class ApplicationStore:
                     normalized["coupon"],
                     normalized["status"],
                     normalized["admin_note"],
+                    normalized["instagram"],
                 ),
             )
             application_id = cursor.lastrowid
@@ -687,6 +694,7 @@ class ApplicationStore:
             price_text = f"{gender_label} {price_amount:,}원"
 
         party_date = self._require_text(payload.get("date") or payload.get("partyDate"), "참여 날짜", 80)
+        instagram = str(payload.get("instagram") or "").strip().lstrip("@")[:50] or None
         coupon = str(payload.get("discount") or payload.get("coupon") or "").strip() or None
         if coupon and len(coupon) > 40:
             raise ValidationError("할인코드는 40자 이내로 입력해 주세요.")
@@ -730,6 +738,7 @@ class ApplicationStore:
             "price_amount": price_amount,
             "location_note": location_note,
             "party_date": party_date,
+            "instagram": instagram,
             "coupon": coupon,
             "status": status,
             "admin_note": admin_note,
@@ -769,6 +778,7 @@ class ApplicationStore:
             "priceAmount": data["price_amount"],
             "locationNote": data["location_note"],
             "partyDate": data["party_date"],
+            "instagram": data.get("instagram") or "",
             "coupon": coupon,
             "status": data["status"],
             "adminNote": data["admin_note"],
