@@ -7,19 +7,38 @@
    ============================================= */
 var calYear, calMonth;
 var calActiveDates = null; // Set of 'YYYY-MM-DD', null = 자동(금/토/일 2주)
+var calClosedDates = new Set(); // 마감된 날짜 Set
+var calDateLabels = {}; // { 'YYYY-MM-DD': '만우절 교복특집' }
+var calDateStatuses = {}; // { 'YYYY-MM-DD': '모집중' | '마감임박' | '마감' }
+var calDateBranches = {}; // { 'YYYY-MM-DD': ['건대'] } — 날짜별 허용 지점 (없으면 전체)
 var CAL_DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
+var CAL_DAYNAME_MAP = {
+  0: "일요일",
+  1: "월요일",
+  2: "화요일",
+  3: "수요일",
+  4: "목요일",
+  5: "금요일",
+  6: "토요일",
+};
+
+function toDateKey(date) {
+  return (
+    date.getFullYear() +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0")
+  );
+}
 
 function isDateActive(date) {
   var today = new Date();
   today.setHours(0, 0, 0, 0);
   if (date < today) return false;
+  var key = toDateKey(date);
+  if (calClosedDates.has(key)) return false;
   if (calActiveDates !== null) {
-    var key =
-      date.getFullYear() +
-      "-" +
-      String(date.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(date.getDate()).padStart(2, "0");
     return calActiveDates.has(key);
   }
   var twoWeeks = new Date(today);
@@ -69,22 +88,20 @@ function renderCalendar() {
     if (dow === 6) classes.push("sat");
     var isToday = date.getTime() === today.getTime();
     if (isToday) classes.push("today-cell");
-    var dateStr =
-      date.getFullYear() +
-      "-" +
-      String(date.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(d).padStart(2, "0");
+    var dateStr = toDateKey(date);
+    var dateStatus = calDateStatuses[dateStr] || null;
+    var dateLabel = calDateLabels[dateStr] || null;
     if (isDateActive(date)) {
       classes.push("available");
+      if (dateStatus === "마감임박") classes.push("cal-urgent");
       if (selectedDate === dateStr) classes.push("selected");
       cell.addEventListener(
         "click",
-        (function (ds, dt) {
+        (function (ds, dt, status, label) {
           return function () {
             document.getElementById("cal-selected-date").value = ds;
             var info = document.getElementById("cal-selected-info");
-            info.textContent =
+            var text =
               "선택: " +
               (dt.getMonth() + 1) +
               "월 " +
@@ -92,11 +109,15 @@ function renderCalendar() {
               "일(" +
               CAL_DAY_NAMES[dt.getDay()] +
               ")";
+            if (label) text += " · " + label;
+            if (status && status !== "마감") text += " [" + status + "]";
+            info.textContent = text;
             info.style.display = "block";
             showError("err-date", false);
+            onDateSelect(ds);
             renderCalendar();
           };
-        })(dateStr, date),
+        })(dateStr, date, dateStatus, dateLabel),
       );
     } else {
       classes.push("inactive");
@@ -106,6 +127,12 @@ function renderCalendar() {
     var numSpan = document.createElement("span");
     numSpan.textContent = d;
     cell.appendChild(numSpan);
+    if (dateStatus && isDateActive(date)) {
+      var statusSpan = document.createElement("span");
+      statusSpan.className =
+        "cal-status-dot" + (dateStatus === "마감임박" ? " urgent" : "");
+      cell.appendChild(statusSpan);
+    }
     if (isToday) {
       var todaySpan = document.createElement("span");
       todaySpan.className = "cal-today-label";
@@ -158,26 +185,23 @@ async function loadScarcity() {
     if (!res.ok) return;
     const data = await res.json();
     const dates = data.dates || {};
-    Object.entries(dates).forEach(([day, info]) => {
-      const badge = document.getElementById("scarcity-" + day);
-      if (!badge) return;
-      const label = badge.closest(".radio-card-label");
-      if (info.level === "마감") {
-        badge.textContent = "마감";
-        badge.className = "radio-card-badge closed";
-        if (label) {
-          label.classList.add("disabled");
-          const input = label.querySelector("input");
-          if (input) input.disabled = true;
+
+    /* 요일 키("일요일") → 날짜 키("2026-03-29") 매핑하여 상태 저장 */
+    if (calActiveDates) {
+      calActiveDates.forEach(function (dateKey) {
+        var dt = new Date(dateKey + "T00:00:00");
+        var dayName = CAL_DAYNAME_MAP[dt.getDay()];
+        var info = dates[dayName];
+        if (info && info.level) {
+          calDateStatuses[dateKey] = info.level;
+          if (info.level === "마감") {
+            calClosedDates.add(dateKey);
+          }
         }
-      } else if (info.level === "마감임박") {
-        badge.textContent = "마감임박";
-        badge.className = "radio-card-badge scarcity urgent";
-      } else {
-        badge.textContent = "모집중";
-        badge.className = "radio-card-badge available";
-      }
-    });
+      });
+    }
+
+    renderCalendar();
   } catch {
     /* no backend — badges stay empty */
   }
@@ -188,9 +212,7 @@ async function loadScarcity() {
    ============================================= */
 async function loadSiteContentAndPricing() {
   try {
-    const res = await fetch(API_BASE + "/api/site-content");
-    if (!res.ok) return;
-    const data = await res.json();
+    const data = await fetchSiteContent();
     const content = data.content || {};
 
     /* Apply text content (sanitized) */
@@ -279,7 +301,15 @@ async function loadPartyDates() {
     if (dates.length === 0) return;
     const dateSet = new Set();
     dates.forEach(function (d) {
-      if (d.date && /^\d{4}-\d{2}-\d{2}$/.test(d.date)) dateSet.add(d.date);
+      if (!d.date || !/^\d{4}-\d{2}-\d{2}$/.test(d.date)) return;
+      dateSet.add(d.date);
+      if (d.label) calDateLabels[d.date] = d.label;
+      if (d.branches && d.branches.length > 0)
+        calDateBranches[d.date] = d.branches;
+      if (d.level) {
+        calDateStatuses[d.date] = d.level;
+        if (d.level === "마감") calClosedDates.add(d.date);
+      }
     });
     if (dateSet.size > 0) {
       calActiveDates = dateSet;
@@ -287,6 +317,46 @@ async function loadPartyDates() {
     }
   } catch {
     /* no custom dates — keep defaults */
+  }
+}
+
+/* =============================================
+   DATE-BRANCH LINKING (날짜 선택 시 허용 지점 필터)
+   ============================================= */
+function onDateSelect(dateKey) {
+  var allowed = calDateBranches[dateKey];
+  var allInputs = document.querySelectorAll('input[name="branch"]');
+  if (!allowed || allowed.length === 0) {
+    /* 제한 없음 — 전체 지점 활성화 */
+    allInputs.forEach(function (input) {
+      input.disabled = false;
+      var lbl = input.closest(".radio-card-label");
+      if (lbl) lbl.classList.remove("disabled");
+    });
+    return;
+  }
+  /* 허용된 지점만 활성화 */
+  var hadSelection = document.querySelector('input[name="branch"]:checked');
+  allInputs.forEach(function (input) {
+    var isAllowed = allowed.indexOf(input.value) >= 0;
+    input.disabled = !isAllowed;
+    var lbl = input.closest(".radio-card-label");
+    if (lbl) lbl.classList.toggle("disabled", !isAllowed);
+    if (!isAllowed && input.checked) {
+      input.checked = false;
+      if (lbl) lbl.classList.remove("selected");
+    }
+  });
+  /* 허용 지점이 1개면 자동 선택 */
+  if (allowed.length === 1) {
+    var single = document.querySelector(
+      'input[name="branch"][value="' + CSS.escape(allowed[0]) + '"]',
+    );
+    if (single && !single.disabled) {
+      single.checked = true;
+      single.closest(".radio-card-label")?.classList.add("selected");
+      single.dispatchEvent(new Event("change", { bubbles: true }));
+    }
   }
 }
 
@@ -326,12 +396,9 @@ _apiDone.finally(function () {
 /* =============================================
    PRICE DATA (loaded from API, fallback to defaults)
    ============================================= */
-let PRICES = {
-  건대: { male: 33000, female: 23000, note: "포틀럭 포함" },
-  영등포: { male: 39500, female: 29500, note: "안주 포함" },
-};
-let PART2_BASE = 18000;
-let PART2_DISCOUNT = 10;
+let PRICES = Object.assign({}, DEFAULT_PRICES);
+let PART2_BASE = DEFAULT_PART2_BASE;
+let PART2_DISCOUNT = DEFAULT_PART2_DISCOUNT;
 
 function getBranchNames() {
   return Object.keys(PRICES);
@@ -659,11 +726,11 @@ document.getElementById("party-form").addEventListener("submit", async (e) => {
   let discountAmount = 0;
   if (discount) {
     try {
-      const vRes = await fetch(
-        API_BASE +
-          "/api/discount/validate?code=" +
-          encodeURIComponent(discount),
-      );
+      const vRes = await fetch(API_BASE + "/api/discount/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: discount }),
+      });
       if (vRes.ok) {
         const vData = await vRes.json();
         if (vData.valid) {

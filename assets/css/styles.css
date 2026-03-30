@@ -2060,6 +2060,21 @@ input {
 .cal-cell.selected .cal-today-label {
   color: rgba(255, 255, 255, 0.65);
 }
+/* Calendar status dots */
+.cal-status-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin: 2px auto 0;
+}
+.cal-status-dot.urgent {
+  background: #facc15;
+}
+.cal-cell.cal-urgent {
+  border-color: rgba(250, 204, 21, 0.4);
+}
 .cal-selected-info {
   display: none;
   margin-top: var(--sp-md);
