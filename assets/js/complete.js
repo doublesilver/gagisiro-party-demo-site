@@ -20,9 +20,10 @@ function fmtGender(g) {
 (async function () {
   try {
     const apiData = await fetchSiteContent();
-    const raw = (apiData.content || {}).pricing;
-    if (raw) {
-      const pricing = typeof raw === "string" ? JSON.parse(raw) : raw;
+    const rawPricing = (apiData.content || {}).pricing;
+    if (rawPricing) {
+      const pricing =
+        typeof rawPricing === "string" ? JSON.parse(rawPricing) : rawPricing;
       const newPrices = {};
       var globalP2Base = pricing.part2_base
         ? Number(pricing.part2_base)

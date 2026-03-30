@@ -42,13 +42,18 @@ var DEFAULT_PART2_DISCOUNT = 10;
    ============================================= */
 var _siteContentCache = null;
 
+var _CACHE_TTL = 300000; /* 5분 */
+
 function fetchSiteContent() {
   if (_siteContentCache) return Promise.resolve(_siteContentCache);
   var cached = sessionStorage.getItem("odd_site_content");
   if (cached) {
     try {
-      _siteContentCache = JSON.parse(cached);
-      return Promise.resolve(_siteContentCache);
+      var parsed = JSON.parse(cached);
+      if (Date.now() - (parsed._ts || 0) < _CACHE_TTL) {
+        _siteContentCache = parsed;
+        return Promise.resolve(parsed);
+      }
     } catch (e) {
       /* parse error — refetch */
     }
@@ -59,6 +64,7 @@ function fetchSiteContent() {
       return res.json();
     })
     .then(function (data) {
+      data._ts = Date.now();
       _siteContentCache = data;
       try {
         sessionStorage.setItem("odd_site_content", JSON.stringify(data));

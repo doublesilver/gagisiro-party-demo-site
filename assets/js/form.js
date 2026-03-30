@@ -199,6 +199,24 @@ async function loadScarcity() {
           }
         }
       });
+    } else {
+      /* 기본 2주 모드: 금/토/일 날짜에 대해 scarcity 매핑 */
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      for (var i = 0; i <= 14; i++) {
+        var dt = new Date(today);
+        dt.setDate(today.getDate() + i);
+        var day = dt.getDay();
+        if (day === 0 || day === 5 || day === 6) {
+          var dateKey = toDateKey(dt);
+          var dayName = CAL_DAYNAME_MAP[day];
+          var info = dates[dayName];
+          if (info && info.level) {
+            calDateStatuses[dateKey] = info.level;
+            if (info.level === "마감") calClosedDates.add(dateKey);
+          }
+        }
+      }
     }
 
     renderCalendar();
